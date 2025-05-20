@@ -6,7 +6,7 @@ root: intro
 chapters:
   - file: Limpieza
   - file: EDA
-  - file: Modelo_clasificación
+  - file: Modelo_clasificacion
   - file: Pipeline_modelos
   - file: Modelo_original
   
