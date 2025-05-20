@@ -1,11 +1,9 @@
-# Welcome to your Jupyter Book
+# Bienvenido al Proyecto de Detección de Fraude
 
-This is a small sample book to give you a feel for how book content is
-structured.
-It shows off a few of the major file types, as well as some sample content.
-It does not go in-depth into any particular topic - check out [the Jupyter Book documentation](https://jupyterbook.org) for more information.
+Este cuaderno contiene las secciones principales del trabajo:
 
-Check out the content pages bundled with this sample book to see more.
-
-```{tableofcontents}
-```
+👉 [Limpieza de Datos](Limpieza.ipynb)  
+👉 [Análisis Exploratorio (EDA)](EDA.ipynb)  
+👉 [Modelo de Clasificación Benchmark](Modelo_clasificacion.ipynb)  
+👉 [Pipeline de Modelos y Comparación](Pipeline_modelos.ipynb)  
+👉 [Modelo Original Propuesto](Modelo_original.ipynb)
