@@ -380,8 +380,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#codificacion-de-variables-categoricas"><strong>Codificación de variables categóricas</strong></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#balanceo-de-clases"><strong>Balanceo de Clases</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pasos-previos"><strong>Pasos previos</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#codificacion-de-variables-categoricas"><strong>Codificación de variables categóricas</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#balanceo-de-clases"><strong>Balanceo de Clases</strong></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contextualizacion"><strong>Contextualización</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelos-benchmark"><strong>Modelos BenchMark</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementacion-de-los-modelos-sin-optimizacion"><strong>Implementación de los modelos (sin optimización)</strong></a><ul class="nav section-nav flex-column">
@@ -429,6 +432,8 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="modelos-de-clasificacion">
 <h1><strong>Modelos de Clasificación</strong><a class="headerlink" href="#modelos-de-clasificacion" title="Link to this heading">#</a></h1>
+<section id="pasos-previos">
+<h2><strong>Pasos previos</strong><a class="headerlink" href="#pasos-previos" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -442,7 +447,7 @@ document.write(`
 </div>
 </div>
 <section id="codificacion-de-variables-categoricas">
-<h2><strong>Codificación de variables categóricas</strong><a class="headerlink" href="#codificacion-de-variables-categoricas" title="Link to this heading">#</a></h2>
+<h3><strong>Codificación de variables categóricas</strong><a class="headerlink" href="#codificacion-de-variables-categoricas" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Cargar el dataset</span>
@@ -533,7 +538,7 @@ Shape transformado: (144218, 74)
 </div>
 </section>
 <section id="balanceo-de-clases">
-<h2><strong>Balanceo de Clases</strong><a class="headerlink" href="#balanceo-de-clases" title="Link to this heading">#</a></h2>
+<h3><strong>Balanceo de Clases</strong><a class="headerlink" href="#balanceo-de-clases" title="Link to this heading">#</a></h3>
 <p>En <em>Machine Learning</em>, una clase se refiere a una de las categorías en las que se agrupan las observaciones dentro de un problema de clasificación. En un conjunto de datos etiquetado, cada instancia está asociada a una clase específica, permitiendo que un modelo aprenda a predecir la categoría correcta para nuevas observaciones. Cuando el número de ejemplos en cada clase está desproporcionado, se habla de un <strong>desbalance de clases</strong>. Esto ocurre cuando una clase tiene significativamente más ejemplos que otra(s), afectando el desempeño del modelo de clasificación. En estas situaciones, el algoritmo tiende a favorecer la clase mayoritaria, lo que puede llevar a una alta precisión global, pero con un desempeño deficiente en la clase minoritaria.</p>
 <p>Para mitigar este problema, se emplean técnicas de balanceo de clases, cuyo objetivo es modificar la distribución de los datos o ajustar la forma en que el modelo aprende. En este estudio, se implementarán tres enfoques principales:</p>
 <ul class="simple">
@@ -607,6 +612,7 @@ Name: proportion, dtype: float64
 </div>
 </div>
 </div>
+</section>
 </section>
 <section id="contextualizacion">
 <h2><strong>Contextualización</strong><a class="headerlink" href="#contextualizacion" title="Link to this heading">#</a></h2>
@@ -3583,8 +3589,11 @@ weighted avg       0.91      0.79      0.83     43266
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#codificacion-de-variables-categoricas"><strong>Codificación de variables categóricas</strong></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#balanceo-de-clases"><strong>Balanceo de Clases</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pasos-previos"><strong>Pasos previos</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#codificacion-de-variables-categoricas"><strong>Codificación de variables categóricas</strong></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#balanceo-de-clases"><strong>Balanceo de Clases</strong></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contextualizacion"><strong>Contextualización</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelos-benchmark"><strong>Modelos BenchMark</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementacion-de-los-modelos-sin-optimizacion"><strong>Implementación de los modelos (sin optimización)</strong></a><ul class="nav section-nav flex-column">
