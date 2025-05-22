@@ -174,7 +174,7 @@
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Bienvenido al Proyecto de Detección de Fraude
+                    Proyecto de Detección de Fraude
                 </a>
             </li>
         </ul>
@@ -383,6 +383,431 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="modelo-original">
 <h1><strong>Modelo Original</strong><a class="headerlink" href="#modelo-original" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">fraude_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;fraude_train.csv&quot;</span><span class="p">)</span> 
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">joblib</span>
+
+<span class="c1"># Cargar modelos</span>
+<span class="n">knn_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;knn_model.pkl&quot;</span><span class="p">)</span>
+<span class="n">rf_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;rf_model.pkl&quot;</span><span class="p">)</span>
+<span class="n">xgb_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;xgb_model.pkl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">imblearn.combine</span> <span class="kn">import</span> <span class="n">SMOTETomek</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="c1"># Separar variables</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">fraude_train</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;isfraud&#39;</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">fraude_train</span><span class="p">[</span><span class="s1">&#39;isfraud&#39;</span><span class="p">]</span>
+
+<span class="c1"># División estratificada</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Balanceo SOLO en entrenamiento</span>
+<span class="n">smote_tomek</span> <span class="o">=</span> <span class="n">SMOTETomek</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span> <span class="o">=</span> <span class="n">smote_tomek</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === Definir modelos base (deben ser pipelines ya entrenados)</span>
+<span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">knn_model</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">rf_model</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)</span>
+<span class="p">]</span>
+
+
+<span class="c1"># === Meta-modelo: regresión logística regularizada</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># === Crear el stacking classifier</span>
+<span class="n">stacking_clf</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimators</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>            <span class="c1"># validación interna para el meta-modelo</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># no pasar X además de predicciones</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Validación cruzada externa + búsqueda de hiperparámetros del meta-modelo (C)</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;final_estimator__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">grid_search_stack</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">stacking_clf</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento con tiempo</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">grid_search_stack</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento y búsqueda (Stacking): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor C:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">&#39;final_estimator__C&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor AUC promedio:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_scorer.py:610: FutureWarning: The `needs_threshold` and `needs_proba` parameter are deprecated in version 1.4 and will be removed in 1.6. You can either let `response_method` be `None` or set it to `predict` to preserve the same behaviour.
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 4 candidates, totalling 20 fits
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_validation.py:540: FitFailedWarning: 
+2 fits failed out of a total of 20.
+The score on these train-test partitions for these parameters will be set to nan.
+If these failures are not expected, you can try to debug them by setting error_score=&#39;raise&#39;.
+
+Below are more details about the failures:
+--------------------------------------------------------------------------------
+1 fits failed with the following error:
+joblib.externals.loky.process_executor._RemoteTraceback: 
+&quot;&quot;&quot;
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\_utils.py&quot;, line 72, in __call__
+    return self.func(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 598, in __call__
+    return [func(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 136, in __call__
+    return self.function(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_base.py&quot;, line 40, in _fit_single_estimator
+    estimator.fit(X, y, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\pipeline.py&quot;, line 473, in fit
+    self._final_estimator.fit(Xt, y, **last_step_params[&quot;fit&quot;])
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1663, in fit
+    train_dmatrix, evals = _wrap_evaluation_matrices(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 628, in _wrap_evaluation_matrices
+    train_dmatrix = create_dmatrix(
+                    ^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1137, in _create_dmatrix
+    return QuantileDMatrix(
+           ^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1614, in __init__
+    self._init(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1678, in _init
+    it.reraise()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 572, in reraise
+    raise exc  # pylint: disable=raising-bad-type
+    ^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 553, in _handle_exception
+    return fn()
+           ^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 640, in &lt;lambda&gt;
+    return self._handle_exception(lambda: int(self.next(input_data)), 0)
+                                              ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1654, in next
+    input_data(**self.kwargs)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 629, in input_data
+    self.proxy.set_info(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 961, in set_info
+    self.set_label(label)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1099, in set_label
+    dispatch_meta_backend(self, label, &quot;label&quot;, &quot;float&quot;)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1586, in dispatch_meta_backend
+    _meta_from_numpy(data, name, dtype, handle)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1533, in _meta_from_numpy
+    _check_call(_LIB.XGDMatrixSetInfoFromInterface(handle, c_str(field), interface_str))
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 310, in _check_call
+    raise XGBoostError(py_str(_LIB.XGBGetLastError()))
+xgboost.core.XGBoostError: [17:58:51] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+&quot;&quot;&quot;
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 672, in fit
+    return super().fit(X, y_encoded, sample_weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 224, in fit
+    self.estimators_ = Parallel(n_jobs=self.n_jobs)(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 74, in __call__
+    return super().__call__(iterable_with_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 2007, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1650, in _get_outputs
+    yield from self._retrieve()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1754, in _retrieve
+    self._raise_error_fast()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1789, in _raise_error_fast
+    error_job.get_result(self.timeout)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 745, in get_result
+    return self._return_or_raise()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 763, in _return_or_raise
+    raise self._result
+xgboost.core.XGBoostError: [17:58:51] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+
+--------------------------------------------------------------------------------
+1 fits failed with the following error:
+joblib.externals.loky.process_executor._RemoteTraceback: 
+&quot;&quot;&quot;
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\_utils.py&quot;, line 72, in __call__
+    return self.func(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 598, in __call__
+    return [func(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 136, in __call__
+    return self.function(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_base.py&quot;, line 40, in _fit_single_estimator
+    estimator.fit(X, y, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\pipeline.py&quot;, line 473, in fit
+    self._final_estimator.fit(Xt, y, **last_step_params[&quot;fit&quot;])
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1663, in fit
+    train_dmatrix, evals = _wrap_evaluation_matrices(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 628, in _wrap_evaluation_matrices
+    train_dmatrix = create_dmatrix(
+                    ^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1137, in _create_dmatrix
+    return QuantileDMatrix(
+           ^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1614, in __init__
+    self._init(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1678, in _init
+    it.reraise()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 572, in reraise
+    raise exc  # pylint: disable=raising-bad-type
+    ^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 553, in _handle_exception
+    return fn()
+           ^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 640, in &lt;lambda&gt;
+    return self._handle_exception(lambda: int(self.next(input_data)), 0)
+                                              ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1654, in next
+    input_data(**self.kwargs)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 629, in input_data
+    self.proxy.set_info(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 961, in set_info
+    self.set_label(label)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1099, in set_label
+    dispatch_meta_backend(self, label, &quot;label&quot;, &quot;float&quot;)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1586, in dispatch_meta_backend
+    _meta_from_numpy(data, name, dtype, handle)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1533, in _meta_from_numpy
+    _check_call(_LIB.XGDMatrixSetInfoFromInterface(handle, c_str(field), interface_str))
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 310, in _check_call
+    raise XGBoostError(py_str(_LIB.XGBGetLastError()))
+xgboost.core.XGBoostError: [17:58:52] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+&quot;&quot;&quot;
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 672, in fit
+    return super().fit(X, y_encoded, sample_weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 224, in fit
+    self.estimators_ = Parallel(n_jobs=self.n_jobs)(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 74, in __call__
+    return super().__call__(iterable_with_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 2007, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1650, in _get_outputs
+    yield from self._retrieve()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1754, in _retrieve
+    self._raise_error_fast()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1789, in _raise_error_fast
+    error_job.get_result(self.timeout)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 745, in get_result
+    return self._return_or_raise()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 763, in _return_or_raise
+    raise self._result
+xgboost.core.XGBoostError: [17:58:52] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+
+  warnings.warn(some_fits_failed_message, FitFailedWarning)
+c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_search.py:1102: UserWarning: One or more of the test scores are non-finite: [0.99814421 0.99808801        nan        nan]
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total entrenamiento y búsqueda (Stacking): 1969.03 segundos
+Mejor C: 0.01
+Mejor AUC promedio: 0.9981442085534713
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span>
+
+<span class="c1"># === Mejor modelo del GridSearchCV</span>
+<span class="n">best_stack_model</span> <span class="o">=</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_estimator_</span>
+
+<span class="c1"># === Predicciones sobre el test original</span>
+<span class="n">y_pred_stack</span> <span class="o">=</span> <span class="n">best_stack_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba_stack</span> <span class="o">=</span> <span class="n">best_stack_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># === Reporte de clasificación</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Stacking ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>=== Classification Report - Stacking ===
+              precision    recall  f1-score   support
+
+         0.0       0.97      0.99      0.98     39871
+         1.0       0.80      0.68      0.73      3395
+
+    accuracy                           0.96     43266
+   macro avg       0.89      0.83      0.86     43266
+weighted avg       0.96      0.96      0.96     43266
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># === Matrices</span>
+<span class="n">cm_stack</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">)</span>
+<span class="n">cm_stack_norm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
+
+<span class="c1"># === Gráficos lado a lado</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm_stack</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;YlGnBu&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión - Stacking&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm_stack_norm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2f&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;YlGnBu&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Matriz Normalizada - Stacking&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/a3b7f61559c8441aa04d8ed419e66b02e80345624f7216cc611c2d769eb2177b.png" src="_images/a3b7f61559c8441aa04d8ed419e66b02e80345624f7216cc611c2d769eb2177b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+
+<span class="c1"># === Curva ROC</span>
+<span class="n">fpr_stack</span><span class="p">,</span> <span class="n">tpr_stack</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="n">auc_stack</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AUC final sobre test (Stacking): </span><span class="si">{</span><span class="n">auc_stack</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr_stack</span><span class="p">,</span> <span class="n">tpr_stack</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Stacking (AUC = </span><span class="si">{</span><span class="n">auc_stack</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Adivinar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Falsos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Verdaderos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Curva ROC - Stacking&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC final sobre test (Stacking): 0.9370
+</pre></div>
+</div>
+<img alt="_images/166f542579077722da0098ece9ba8dec70b37aca526b3018541e128aa6ce51cb.png" src="_images/166f542579077722da0098ece9ba8dec70b37aca526b3018541e128aa6ce51cb.png" />
+</div>
+</div>
 </section>
 
     <script type="text/x-thebe-config">
