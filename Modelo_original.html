@@ -356,7 +356,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -372,6 +374,15 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelos-de-prueba"><strong>Modelos de prueba</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelos-original-definitivo"><strong>Modelos Original definitivo</strong></a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -383,6 +394,8 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="modelo-original">
 <h1><strong>Modelo Original</strong><a class="headerlink" href="#modelo-original" title="Link to this heading">#</a></h1>
+<section id="modelos-de-prueba">
+<h2><strong>Modelos de prueba</strong><a class="headerlink" href="#modelos-de-prueba" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -399,6 +412,7 @@ document.write(`
 <span class="n">knn_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;knn_model.pkl&quot;</span><span class="p">)</span>
 <span class="n">rf_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;rf_model.pkl&quot;</span><span class="p">)</span>
 <span class="n">xgb_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;xgb_model.pkl&quot;</span><span class="p">)</span>
+<span class="n">ridge_model</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;ridge_model.pkl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -420,6 +434,403 @@ document.write(`
 <span class="c1"># Balanceo SOLO en entrenamiento</span>
 <span class="n">smote_tomek</span> <span class="o">=</span> <span class="n">SMOTETomek</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 <span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span> <span class="o">=</span> <span class="n">smote_tomek</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === Redefinir pipelines base desde cero (sin cargar los .pkl)</span>
+<span class="n">pipe_knn</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">9</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">pipe_rf</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">pipe_xgb</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">subsample</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">tree_method</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>               <span class="c1"># FORZAR CPU</span>
+        <span class="n">predictor</span><span class="o">=</span><span class="s1">&#39;cpu_predictor&#39;</span><span class="p">,</span>        <span class="c1"># FORZAR CPU</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># === Lista de modelos base</span>
+<span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">pipe_knn</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">pipe_rf</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">pipe_xgb</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># === Meta-modelo</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># === StackingClassifier</span>
+<span class="n">stacking_clf</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimators</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === GridSearchCV para C</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;final_estimator__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">grid_search_stack</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">stacking_clf</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">grid_search_stack</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento y búsqueda (Stacking): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor C:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">&#39;final_estimator__C&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor AUC promedio:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_scorer.py:610: FutureWarning: The `needs_threshold` and `needs_proba` parameter are deprecated in version 1.4 and will be removed in 1.6. You can either let `response_method` be `None` or set it to `predict` to preserve the same behaviour.
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 4 candidates, totalling 20 fits
+
+Tiempo total entrenamiento y búsqueda (Stacking): 1395.45 segundos
+Mejor C: 10
+Mejor AUC promedio: 0.9979746149993349
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === Definir modelos base (deben ser pipelines ya entrenados)</span>
+<span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">knn_model</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">rf_model</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)</span>
+<span class="p">]</span>
+
+
+<span class="c1"># === Meta-modelo: regresión logística regularizada</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># === Crear el stacking classifier</span>
+<span class="n">stacking_clf</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimators</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>            <span class="c1"># validación interna para el meta-modelo</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># no pasar X además de predicciones</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Validación cruzada externa + búsqueda de hiperparámetros del meta-modelo (C)</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;final_estimator__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">grid_search_stack</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">stacking_clf</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento con tiempo</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">grid_search_stack</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento y búsqueda (Stacking): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor C:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">&#39;final_estimator__C&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor AUC promedio:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_scorer.py:610: FutureWarning: The `needs_threshold` and `needs_proba` parameter are deprecated in version 1.4 and will be removed in 1.6. You can either let `response_method` be `None` or set it to `predict` to preserve the same behaviour.
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 4 candidates, totalling 20 fits
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_validation.py:540: FitFailedWarning: 
+2 fits failed out of a total of 20.
+The score on these train-test partitions for these parameters will be set to nan.
+If these failures are not expected, you can try to debug them by setting error_score=&#39;raise&#39;.
+
+Below are more details about the failures:
+--------------------------------------------------------------------------------
+1 fits failed with the following error:
+joblib.externals.loky.process_executor._RemoteTraceback: 
+&quot;&quot;&quot;
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\_utils.py&quot;, line 72, in __call__
+    return self.func(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 598, in __call__
+    return [func(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 136, in __call__
+    return self.function(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_base.py&quot;, line 40, in _fit_single_estimator
+    estimator.fit(X, y, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\pipeline.py&quot;, line 473, in fit
+    self._final_estimator.fit(Xt, y, **last_step_params[&quot;fit&quot;])
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1663, in fit
+    train_dmatrix, evals = _wrap_evaluation_matrices(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 628, in _wrap_evaluation_matrices
+    train_dmatrix = create_dmatrix(
+                    ^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1137, in _create_dmatrix
+    return QuantileDMatrix(
+           ^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1614, in __init__
+    self._init(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1678, in _init
+    it.reraise()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 572, in reraise
+    raise exc  # pylint: disable=raising-bad-type
+    ^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 553, in _handle_exception
+    return fn()
+           ^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 640, in &lt;lambda&gt;
+    return self._handle_exception(lambda: int(self.next(input_data)), 0)
+                                              ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1654, in next
+    input_data(**self.kwargs)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 629, in input_data
+    self.proxy.set_info(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 961, in set_info
+    self.set_label(label)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1099, in set_label
+    dispatch_meta_backend(self, label, &quot;label&quot;, &quot;float&quot;)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1586, in dispatch_meta_backend
+    _meta_from_numpy(data, name, dtype, handle)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1533, in _meta_from_numpy
+    _check_call(_LIB.XGDMatrixSetInfoFromInterface(handle, c_str(field), interface_str))
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 310, in _check_call
+    raise XGBoostError(py_str(_LIB.XGBGetLastError()))
+xgboost.core.XGBoostError: [17:58:51] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+&quot;&quot;&quot;
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 672, in fit
+    return super().fit(X, y_encoded, sample_weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 224, in fit
+    self.estimators_ = Parallel(n_jobs=self.n_jobs)(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 74, in __call__
+    return super().__call__(iterable_with_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 2007, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1650, in _get_outputs
+    yield from self._retrieve()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1754, in _retrieve
+    self._raise_error_fast()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1789, in _raise_error_fast
+    error_job.get_result(self.timeout)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 745, in get_result
+    return self._return_or_raise()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 763, in _return_or_raise
+    raise self._result
+xgboost.core.XGBoostError: [17:58:51] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+
+--------------------------------------------------------------------------------
+1 fits failed with the following error:
+joblib.externals.loky.process_executor._RemoteTraceback: 
+&quot;&quot;&quot;
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\_utils.py&quot;, line 72, in __call__
+    return self.func(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 598, in __call__
+    return [func(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 136, in __call__
+    return self.function(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_base.py&quot;, line 40, in _fit_single_estimator
+    estimator.fit(X, y, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\pipeline.py&quot;, line 473, in fit
+    self._final_estimator.fit(Xt, y, **last_step_params[&quot;fit&quot;])
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1663, in fit
+    train_dmatrix, evals = _wrap_evaluation_matrices(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 628, in _wrap_evaluation_matrices
+    train_dmatrix = create_dmatrix(
+                    ^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\sklearn.py&quot;, line 1137, in _create_dmatrix
+    return QuantileDMatrix(
+           ^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1614, in __init__
+    self._init(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1678, in _init
+    it.reraise()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 572, in reraise
+    raise exc  # pylint: disable=raising-bad-type
+    ^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 553, in _handle_exception
+    return fn()
+           ^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 640, in &lt;lambda&gt;
+    return self._handle_exception(lambda: int(self.next(input_data)), 0)
+                                              ^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1654, in next
+    input_data(**self.kwargs)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 629, in input_data
+    self.proxy.set_info(
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 729, in inner_f
+    return func(**kwargs)
+           ^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 961, in set_info
+    self.set_label(label)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 1099, in set_label
+    dispatch_meta_backend(self, label, &quot;label&quot;, &quot;float&quot;)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1586, in dispatch_meta_backend
+    _meta_from_numpy(data, name, dtype, handle)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\data.py&quot;, line 1533, in _meta_from_numpy
+    _check_call(_LIB.XGDMatrixSetInfoFromInterface(handle, c_str(field), interface_str))
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\xgboost\core.py&quot;, line 310, in _check_call
+    raise XGBoostError(py_str(_LIB.XGBGetLastError()))
+xgboost.core.XGBoostError: [17:58:52] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+&quot;&quot;&quot;
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 672, in fit
+    return super().fit(X, y_encoded, sample_weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\ensemble\_stacking.py&quot;, line 224, in fit
+    self.estimators_ = Parallel(n_jobs=self.n_jobs)(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\utils\parallel.py&quot;, line 74, in __call__
+    return super().__call__(iterable_with_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 2007, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1650, in _get_outputs
+    yield from self._retrieve()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1754, in _retrieve
+    self._raise_error_fast()
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 1789, in _raise_error_fast
+    error_job.get_result(self.timeout)
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 745, in get_result
+    return self._return_or_raise()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;c:\Users\Asus\anaconda3\Lib\site-packages\joblib\parallel.py&quot;, line 763, in _return_or_raise
+    raise self._result
+xgboost.core.XGBoostError: [17:58:52] C:\actions-runner\_work\xgboost\xgboost\src\data\array_interface.cu:44: Check failed: err == cudaGetLastError() (0 vs. 46) : 
+
+  warnings.warn(some_fits_failed_message, FitFailedWarning)
+c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\model_selection\_search.py:1102: UserWarning: One or more of the test scores are non-finite: [0.99814421 0.99808801        nan        nan]
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total entrenamiento y búsqueda (Stacking): 1969.03 segundos
+Mejor C: 0.01
+Mejor AUC promedio: 0.9981442085534713
 </pre></div>
 </div>
 </div>
@@ -737,11 +1148,11 @@ Mejor AUC promedio: 0.9981442085534713
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>=== Classification Report - Stacking ===
               precision    recall  f1-score   support
 
-         0.0       0.97      0.99      0.98     39871
-         1.0       0.80      0.68      0.73      3395
+         0.0       0.97      0.98      0.98     39871
+         1.0       0.74      0.69      0.72      3395
 
     accuracy                           0.96     43266
-   macro avg       0.89      0.83      0.86     43266
+   macro avg       0.86      0.84      0.85     43266
 weighted avg       0.96      0.96      0.96     43266
 </pre></div>
 </div>
@@ -802,12 +1213,819 @@ weighted avg       0.96      0.96      0.96     43266
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC final sobre test (Stacking): 0.9370
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC final sobre test (Stacking): 0.9333
 </pre></div>
 </div>
-<img alt="_images/166f542579077722da0098ece9ba8dec70b37aca526b3018541e128aa6ce51cb.png" src="_images/166f542579077722da0098ece9ba8dec70b37aca526b3018541e128aa6ce51cb.png" />
+<img alt="_images/96fd4210ada5a70d10bd7c02c916651f06d4523198a5e9618160e6b9d3e24191.png" src="_images/96fd4210ada5a70d10bd7c02c916651f06d4523198a5e9618160e6b9d3e24191.png" />
 </div>
 </div>
+<p>Intento 2</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === Redefinir pipelines base desde cero (sin cargar los .pkl)</span>
+<span class="sd">&#39;&#39;&#39;&#39;</span>
+<span class="sd">pipe_knn = Pipeline([</span>
+<span class="sd">    (&#39;scaler&#39;, StandardScaler()),</span>
+<span class="sd">    (&#39;knn&#39;, KNeighborsClassifier(n_neighbors=9))</span>
+<span class="sd">])</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+
+<span class="n">pipe_rf</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">pipe_xgb</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">subsample</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">tree_method</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>               <span class="c1"># FORZAR CPU</span>
+        <span class="n">predictor</span><span class="o">=</span><span class="s1">&#39;cpu_predictor&#39;</span><span class="p">,</span>        <span class="c1"># FORZAR CPU</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># === Lista de modelos base</span>
+<span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1">#(&#39;knn&#39;, pipe_knn),</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">pipe_rf</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">pipe_xgb</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># === Meta-modelo</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># === StackingClassifier</span>
+<span class="n">stacking_clf</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimators</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === GridSearchCV para C</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;final_estimator__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">grid_search_stack</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">stacking_clf</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">grid_search_stack</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento y búsqueda (Stacking): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor C:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">&#39;final_estimator__C&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor AUC promedio:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_scorer.py:610: FutureWarning: The `needs_threshold` and `needs_proba` parameter are deprecated in version 1.4 and will be removed in 1.6. You can either let `response_method` be `None` or set it to `predict` to preserve the same behaviour.
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 4 candidates, totalling 20 fits
+
+Tiempo total entrenamiento y búsqueda (Stacking): 1399.55 segundos
+Mejor C: 0.01
+Mejor AUC promedio: 0.9950874872142867
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span>
+
+<span class="c1"># === Mejor modelo del GridSearchCV</span>
+<span class="n">best_stack_model</span> <span class="o">=</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_estimator_</span>
+
+<span class="c1"># === Predicciones sobre el test original</span>
+<span class="n">y_pred_stack</span> <span class="o">=</span> <span class="n">best_stack_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba_stack</span> <span class="o">=</span> <span class="n">best_stack_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># === Reporte de clasificación</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Stacking ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>=== Classification Report - Stacking ===
+              precision    recall  f1-score   support
+
+         0.0       0.97      0.99      0.98     39871
+         1.0       0.81      0.69      0.74      3395
+
+    accuracy                           0.96     43266
+   macro avg       0.89      0.84      0.86     43266
+weighted avg       0.96      0.96      0.96     43266
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+
+<span class="c1"># === Curva ROC</span>
+<span class="n">fpr_stack</span><span class="p">,</span> <span class="n">tpr_stack</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="n">auc_stack</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AUC final sobre test (Stacking): </span><span class="si">{</span><span class="n">auc_stack</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr_stack</span><span class="p">,</span> <span class="n">tpr_stack</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Stacking (AUC = </span><span class="si">{</span><span class="n">auc_stack</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Adivinar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Falsos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Verdaderos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Curva ROC - Stacking&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC final sobre test (Stacking): 0.9416
+</pre></div>
+</div>
+<img alt="_images/dd31eadc1ee5ad3391e0b7ce9bf455eb1dec6b3962d952512481a3c47fa49b95.png" src="_images/dd31eadc1ee5ad3391e0b7ce9bf455eb1dec6b3962d952512481a3c47fa49b95.png" />
+</div>
+</div>
+<p>intento 3</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === Definir modelos base (asegúrate de que estos estén previamente entrenados o guardados como pipelines)</span>
+<span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">rf_model</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># === Meta-modelo</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># === Crear stacking</span>
+<span class="n">stacking_clf</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimators</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Búsqueda de hiperparámetros del meta-modelo</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;final_estimator__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">grid_search_stack</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="o">=</span><span class="n">stacking_clf</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">grid_search_stack</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento y búsqueda (Stacking reducido): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor C:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_params_</span><span class="p">[</span><span class="s1">&#39;final_estimator__C&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mejor AUC promedio:&quot;</span><span class="p">,</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_scorer.py:610: FutureWarning: The `needs_threshold` and `needs_proba` parameter are deprecated in version 1.4 and will be removed in 1.6. You can either let `response_method` be `None` or set it to `predict` to preserve the same behaviour.
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 4 candidates, totalling 20 fits
+
+Tiempo total entrenamiento y búsqueda (Stacking reducido): 1553.74 segundos
+Mejor C: 0.01
+Mejor AUC promedio: 0.9962569620772326
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span>
+
+<span class="c1"># === Mejor modelo del GridSearchCV</span>
+<span class="n">best_stack_model</span> <span class="o">=</span> <span class="n">grid_search_stack</span><span class="o">.</span><span class="n">best_estimator_</span>
+
+<span class="c1"># === Predicciones sobre el test original</span>
+<span class="n">y_pred_stack</span> <span class="o">=</span> <span class="n">best_stack_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba_stack</span> <span class="o">=</span> <span class="n">best_stack_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># === Reporte de clasificación</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Stacking ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>=== Classification Report - Stacking ===
+              precision    recall  f1-score   support
+
+         0.0       0.97      0.99      0.98     39871
+         1.0       0.84      0.65      0.74      3395
+
+    accuracy                           0.96     43266
+   macro avg       0.91      0.82      0.86     43266
+weighted avg       0.96      0.96      0.96     43266
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># === 1. Imports ===</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span><span class="p">,</span> <span class="n">GradientBoostingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === 2. Modelos base (pre-entrenados y escalados) ===</span>
+<span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">knn_model</span><span class="p">),</span>        <span class="c1"># con escalador dentro</span>
+    <span class="p">(</span><span class="s1">&#39;ridge&#39;</span><span class="p">,</span> <span class="n">ridge_model</span><span class="p">),</span>    <span class="c1"># con escalador dentro</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">rf_model</span><span class="p">),</span>          <span class="c1"># sin escalado</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)</span>         <span class="c1"># sin escalado</span>
+<span class="p">]</span>
+
+<span class="c1"># === 3. Meta-modelo más potente ===</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># === 4. StackingClassifier con passthrough activado ===</span>
+<span class="n">stacking_clf</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimators</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === 5. Entrenamiento final con medición de tiempo ===</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">stacking_clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento (Stacking optimizado): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total entrenamiento (Stacking optimizado): 435.96 segundos
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># === Predicciones con el stacking optimizado ===</span>
+<span class="n">y_pred_stack</span> <span class="o">=</span> <span class="n">stacking_clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba_stack</span> <span class="o">=</span> <span class="n">stacking_clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># === Reporte de clasificación ===</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Stacking Optimizado ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">))</span>
+
+<span class="c1"># === Curva ROC ===</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="n">auc_score</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AUC final sobre test (Stacking optimizado): </span><span class="si">{</span><span class="n">auc_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Stacking (AUC = </span><span class="si">{</span><span class="n">auc_score</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Adivinar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Falsos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Verdaderos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Curva ROC - Stacking (Optimizado)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># === Matriz de confusión ===</span>
+<span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;YlGnBu&quot;</span><span class="p">,</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;No Fraude&quot;</span><span class="p">,</span> <span class="s2">&quot;Fraude&quot;</span><span class="p">],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;No Fraude&quot;</span><span class="p">,</span> <span class="s2">&quot;Fraude&quot;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión - Stacking (Optimizado)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>=== Classification Report - Stacking Optimizado ===
+              precision    recall  f1-score   support
+
+         0.0       0.96      0.99      0.98     39871
+         1.0       0.88      0.57      0.69      3395
+
+    accuracy                           0.96     43266
+   macro avg       0.92      0.78      0.84     43266
+weighted avg       0.96      0.96      0.96     43266
+
+
+AUC final sobre test (Stacking optimizado): 0.9009
+</pre></div>
+</div>
+<img alt="_images/a00667796b3d1611e7b163cc3623353a502dad7e364d926f68c89125596c83d3.png" src="_images/a00667796b3d1611e7b163cc3623353a502dad7e364d926f68c89125596c83d3.png" />
+<img alt="_images/68bfca0d5fd7fe51de9b36d64be5f691fd5d4889e201eaf13de2f8d00b9d9c7b.png" src="_images/68bfca0d5fd7fe51de9b36d64be5f691fd5d4889e201eaf13de2f8d00b9d9c7b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># === 1. Imports ===</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">imblearn.combine</span> <span class="kn">import</span> <span class="n">SMOTETomek</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === 2. División y balanceo ===</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">fraude_train</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;isfraud&quot;</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">fraude_train</span><span class="p">[</span><span class="s2">&quot;isfraud&quot;</span><span class="p">]</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="n">smote</span> <span class="o">=</span> <span class="n">SMOTETomek</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span> <span class="o">=</span> <span class="n">smote</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># === 3. Modelos base con hiperparámetros buenos conocidos ===</span>
+<span class="n">rf_model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_features</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="n">xgb_model</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">subsample</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">eval_metric</span><span class="o">=</span><span class="s1">&#39;logloss&#39;</span><span class="p">,</span>
+    <span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># === 4. Meta-modelo: Regresión logística con escalado ===</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># === 5. Crear StackingClassifier ===</span>
+<span class="n">stacking</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">rf_model</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)],</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="c1"># === 6. Entrenamiento y evaluación ===</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">stacking</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total de entrenamiento del modelo stacking optimizado: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Predicción y métricas ===</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">stacking</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba</span> <span class="o">=</span> <span class="n">stacking</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Stacking Optimizado ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AUC final sobre test (Stacking optimizado): </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_proba</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total de entrenamiento del modelo stacking optimizado: 129.24 segundos
+
+=== Classification Report - Stacking Optimizado ===
+              precision    recall  f1-score   support
+
+         0.0       0.97      0.99      0.98     39871
+         1.0       0.80      0.63      0.71      3395
+
+    accuracy                           0.96     43266
+   macro avg       0.88      0.81      0.84     43266
+weighted avg       0.96      0.96      0.96     43266
+
+
+AUC final sobre test (Stacking optimizado): 0.9391
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">SGDClassifier</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">joblib</span>
+
+<span class="c1"># === Definir modelos base ===</span>
+<span class="n">knn_model</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">9</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">sgd_model</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="n">SGDClassifier</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;hinge&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">xgb_model</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">subsample</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">tree_method</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+    <span class="n">eval_metric</span><span class="o">=</span><span class="s1">&#39;logloss&#39;</span><span class="p">,</span>
+    <span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Meta-modelo ===</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span>
+    <span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span>
+    <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span>
+    <span class="n">C</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">class_weight</span><span class="o">=</span><span class="s1">&#39;balanced&#39;</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># === Definir stacking ===</span>
+<span class="n">stacking_model</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">knn_model</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="n">sgd_model</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento ===</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">stacking_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento Stacking Final: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Evaluación ===</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">stacking_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba</span> <span class="o">=</span> <span class="n">stacking_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Modelo Original ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+
+<span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AUC final sobre test: </span><span class="si">{</span><span class="n">auc</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Guardar modelo ===</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">stacking_model</span><span class="p">,</span> <span class="s2">&quot;modelo_original_stacking.pkl&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Curva ROC ===</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Stacking Final (AUC = </span><span class="si">{</span><span class="n">auc</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Adivinar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Falsos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Verdaderos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Curva ROC - Modelo Original&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total entrenamiento Stacking Final: 52.84 segundos
+
+=== Classification Report - Modelo Original ===
+              precision    recall  f1-score   support
+
+         0.0       0.96      0.65      0.77     39871
+         1.0       0.14      0.68      0.23      3395
+
+    accuracy                           0.65     43266
+   macro avg       0.55      0.66      0.50     43266
+weighted avg       0.90      0.65      0.73     43266
+
+
+AUC final sobre test: 0.7300
+</pre></div>
+</div>
+<img alt="_images/ff61c8db3e59e8686b63ac5b164cb0932d06b6af7753a3d5e69b1ddbbf548ac5.png" src="_images/ff61c8db3e59e8686b63ac5b164cb0932d06b6af7753a3d5e69b1ddbbf548ac5.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span><span class="p">,</span> <span class="n">SGDClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">joblib</span>
+
+<span class="c1"># === Modelos base optimizados ===</span>
+
+<span class="c1"># SGD con escalado</span>
+<span class="n">sgd_model</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="n">SGDClassifier</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;hinge&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># XGBoost optimizado</span>
+<span class="n">xgb_model</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">subsample</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">tree_method</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+    <span class="n">eval_metric</span><span class="o">=</span><span class="s1">&#39;logloss&#39;</span><span class="p">,</span>
+    <span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># Meta-modelo más tolerante al desbalanceo</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span>
+    <span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span>
+    <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span>
+    <span class="n">C</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">class_weight</span><span class="o">=</span><span class="s1">&#39;balanced&#39;</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># === Stacking optimizado ===</span>
+<span class="n">stacking_model</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="n">sgd_model</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">xgb_model</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === Entrenamiento ===</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">stacking_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total entrenamiento (Stacking optimizado): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Evaluación ===</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">stacking_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba</span> <span class="o">=</span> <span class="n">stacking_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Modelo Original FINAL ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+
+<span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AUC final sobre test: </span><span class="si">{</span><span class="n">auc</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Guardar modelo ===</span>
+<span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">stacking_model</span><span class="p">,</span> <span class="s2">&quot;modelo_original_final.pkl&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Curva ROC ===</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Stacking Optimizado (AUC = </span><span class="si">{</span><span class="n">auc</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Adivinar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Falsos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Verdaderos positivos&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Curva ROC - Modelo Original Final&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total entrenamiento (Stacking optimizado): 29.59 segundos
+
+=== Classification Report - Modelo Original FINAL ===
+              precision    recall  f1-score   support
+
+         0.0       0.98      0.99      0.98     39871
+         1.0       0.81      0.71      0.76      3395
+
+    accuracy                           0.96     43266
+   macro avg       0.89      0.85      0.87     43266
+weighted avg       0.96      0.96      0.96     43266
+
+
+AUC final sobre test: 0.9412
+</pre></div>
+</div>
+<img alt="_images/fe7004d70642e98aec7c8ab91f88e54b6e5e2c71bdcf81497bda16ea1c7a08c5.png" src="_images/fe7004d70642e98aec7c8ab91f88e54b6e5e2c71bdcf81497bda16ea1c7a08c5.png" />
+</div>
+</div>
+</section>
+<section id="modelos-original-definitivo">
+<h2><strong>Modelos Original definitivo</strong><a class="headerlink" href="#modelos-original-definitivo" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># === 1. Imports necesarios ===</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">StackingClassifier</span><span class="p">,</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># === 2. Modelos base (entrenados desde cero con mejores hiperparámetros) ===</span>
+<span class="n">base_models</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;xgb&#39;</span><span class="p">,</span> <span class="n">XGBClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">max_depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">subsample</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">eval_metric</span><span class="o">=</span><span class="s1">&#39;logloss&#39;</span><span class="p">,</span>
+        <span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+    <span class="p">))</span>
+<span class="p">]</span>
+
+<span class="c1"># === 3. Meta-modelo: regresión logística escalada ===</span>
+<span class="n">meta_model</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="n">LogisticRegression</span><span class="p">(</span>
+        <span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span>
+        <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span>
+        <span class="n">C</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+    <span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># === 4. Construir modelo stacking ===</span>
+<span class="n">stacking_model</span> <span class="o">=</span> <span class="n">StackingClassifier</span><span class="p">(</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">base_models</span><span class="p">,</span>
+    <span class="n">final_estimator</span><span class="o">=</span><span class="n">meta_model</span><span class="p">,</span>
+    <span class="n">passthrough</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># === 5. Entrenar y medir tiempo ===</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">stacking_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_bal</span><span class="p">,</span> <span class="n">y_train_bal</span><span class="p">)</span>
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tiempo total de entrenamiento (Stacking optimizado): </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> segundos&quot;</span><span class="p">)</span>
+
+<span class="c1"># === 6. Predicción y métricas ===</span>
+<span class="n">y_pred_stack</span> <span class="o">=</span> <span class="n">stacking_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">y_proba_stack</span> <span class="o">=</span> <span class="n">stacking_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Classification Report - Modelo Original FINAL ===&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_stack</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AUC final sobre test (Stacking optimizado): </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_proba_stack</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># === 7. Curva ROC ===</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_proba_stack</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Stacking (AUC = </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_proba_stack</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Adivinar&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Falsos positivos&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Verdaderos positivos&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Curva ROC - Modelo Original Final&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo total de entrenamiento (Stacking optimizado): 129.54 segundos
+
+=== Classification Report - Modelo Original FINAL ===
+              precision    recall  f1-score   support
+
+         0.0       0.97      0.99      0.98     39871
+         1.0       0.87      0.66      0.75      3395
+
+    accuracy                           0.97     43266
+   macro avg       0.92      0.83      0.87     43266
+weighted avg       0.96      0.97      0.96     43266
+
+
+AUC final sobre test (Stacking optimizado): 0.9533
+</pre></div>
+</div>
+<img alt="_images/7a075734bb1e210016c2743648cc6a9bfea16add2f915248fd82fc2b90aee5a6.png" src="_images/7a075734bb1e210016c2743648cc6a9bfea16add2f915248fd82fc2b90aee5a6.png" />
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -855,6 +2073,22 @@ weighted avg       0.96      0.96      0.96     43266
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelos-de-prueba"><strong>Modelos de prueba</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelos-original-definitivo"><strong>Modelos Original definitivo</strong></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
