@@ -842,6 +842,14 @@ Mejor AUC promedio: 0.9981442085534713
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">roc_auc_score</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd"># Por si se desea suprimir el warning de ajuste fallido</span>
+<span class="sd">import warnings</span>
+<span class="sd">from sklearn.exceptions import FitFailedWarning</span>
+
+<span class="sd">warnings.filterwarnings(&quot;ignore&quot;, category=FitFailedWarning)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
 
 <span class="c1"># === Definir modelos base (deben ser pipelines ya entrenados)</span>
 <span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span>

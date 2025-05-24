@@ -175,7 +175,7 @@
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Bienvenido al Proyecto de Detección de Fraude
+                    Proyecto de Detección de Fraude
                 </a>
             </li>
         </ul>
@@ -381,6 +381,10 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#librerias"><strong>Librerias</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contextualizacion-del-conjunto-de-datos"><strong>Contextualización del Conjunto de Datos</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#transformacion-final"><strong>Transformación final</strong></a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -405,6 +409,68 @@ document.write(`
 </pre></div>
 </div>
 </div>
+</div>
+</section>
+<section id="contextualizacion-del-conjunto-de-datos">
+<h2><strong>Contextualización del Conjunto de Datos</strong><a class="headerlink" href="#contextualizacion-del-conjunto-de-datos" title="Link to this heading">#</a></h2>
+<p>Los datos provienen de transacciones reales de comercio electrónico registradas por la empresa Vesta. El conjunto incluye una amplia variedad de características que abarcan desde información del dispositivo utilizado hasta detalles específicos del producto adquirido. El propósito central del estudio es optimizar la detección de transacciones fraudulentas a gran escala, con el fin de reducir las pérdidas económicas para miles de empresas y, al mismo tiempo, minimizar los falsos positivos que afectan a millones de usuarios.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Variable</strong></p></th>
+<th class="head"><p><strong>Descripción</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code></p></td>
+<td><p>Intervalo de tiempo a partir de una fecha y hora de referencia</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransactionAMT</span></code></p></td>
+<td><p>Importe del pago de la transacción en USD</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ProductCD</span></code></p></td>
+<td><p>Código de producto, el producto de cada transacción</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">card1</span></code> - <code class="docutils literal notranslate"><span class="pre">card6</span></code></p></td>
+<td><p>Información de la tarjeta de pago: tipo, categoría, banco emisor, país, etc.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">addr</span></code></p></td>
+<td><p>Dirección</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dist</span></code></p></td>
+<td><p>Distancia</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">P_emaildomain</span></code></p></td>
+<td><p>Dominio de correo electrónico del comprador</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">R_emaildomain</span></code></p></td>
+<td><p>Dominio de correo electrónico del destinatario</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">C1</span></code> - <code class="docutils literal notranslate"><span class="pre">C14</span></code></p></td>
+<td><p>Recuento de direcciones asociadas a la tarjeta de pago (codificado)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">D1</span></code> - <code class="docutils literal notranslate"><span class="pre">D15</span></code></p></td>
+<td><p>Intervalos de tiempo entre eventos o transacciones</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">M1</span></code> - <code class="docutils literal notranslate"><span class="pre">M9</span></code></p></td>
+<td><p>Coincidencias como nombre y dirección entre usuario y tarjeta</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Vxxx</span></code></p></td>
+<td><p>Variables derivadas por Vesta: recuento, clasificación, relaciones entre entidades</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DeviceType</span></code></p></td>
+<td><p>Información codificada del tipo de dispositivo</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DeviceInfo</span></code></p></td>
+<td><p>Información codificada del software/dispositivo utilizado</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id_12</span></code> - <code class="docutils literal notranslate"><span class="pre">id_38</span></code></p></td>
+<td><p>Identidad codificada del usuario, IP, ISP, Proxy, firma digital, etc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">isfraud</span></code></p></td>
+<td><p>Variable objetivo del análisis. Toma el valor 1 si la transacción fue identificada como fraudulenta y 0 en caso contrario.</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -431,6 +497,41 @@ Columnas: 73
 </div>
 </div>
 </div>
+<p>El conjunto de datos utilizado para el análisis corresponde a una fusión de las tablas originales <code class="docutils literal notranslate"><span class="pre">train_transaction.csv</span></code> y <code class="docutils literal notranslate"><span class="pre">train_identity.csv</span></code>, realizada mediante una unión tipo <code class="docutils literal notranslate"><span class="pre">LEFT</span> <span class="pre">JOIN</span></code> a través del identificador común <code class="docutils literal notranslate"><span class="pre">TransactionID</span></code>. Este procedimiento permitió consolidar en un solo archivo la información transaccional y de identidad digital de los usuarios, con el objetivo de disponer de un conjunto completo para las tareas de limpieza, exploración y modelado.</p>
+<p>Inicialmente, el dataframe resultante de esta fusión contenía 144.233 registros y un total de 434 variables. No obstante, este volumen incluía una gran cantidad de columnas completamente vacías o con alta proporción de valores nulos. En consecuencia, se eliminaron todas aquellas variables que contenían el 100% de datos ausentes, así como aquellas que presentaban más del 50% de valores nulos, por considerarse que no aportaban información estadísticamente confiable.</p>
+<p>Una vez depurado el conjunto en términos de completitud, se procedió a imputar los valores faltantes restantes. Para las variables numéricas, se aplicó una estrategia de imputación basada en K-Nearest Neighbors (<code class="docutils literal notranslate"><span class="pre">KNNImputer</span></code>), en dos fases según el porcentaje de valores ausentes. Las variables con mayor proporción de nulos se imputaron primero para evitar que su carencia influyera en la calidad de la segunda imputación. En cuanto a las variables categóricas, dado que los porcentajes de nulos eran inferiores al 2.5%, se optó por una imputación directa mediante la moda de cada variable.</p>
+<p>Adicionalmente, se implementaron procedimientos de reducción de dimensionalidad, comenzando con la eliminación de variables con <strong>alta multicolinealidad</strong> mediante el cálculo del <strong>Factor de Inflación de Varianza (VIF)</strong>. Este proceso se aplicó de manera iterativa antes de la imputación, eliminando sucesivamente las variables con mayor VIF hasta garantizar que todas las variables numéricas restantes presentaran una relación lineal aceptable (VIF &lt; 10). Posteriormente, se evaluó la dependencia entre variables categóricas usando la <strong>prueba de chi-cuadrado de independencia</strong>, eliminando aquellas que presentaban correlación estadísticamente significativa con otras variables, lo cual contribuía a la redundancia en el modelo.</p>
+<p>Como resultado de este proceso exhaustivo, el conjunto final de datos quedó conformado por 73 variables, todas completas, sin multicolinealidad severa, sin redundancias categóricas, y aptas para su utilización en el análisis exploratorio y el posterior modelado predictivo. Este procesamiento se documenta con mayor detalle en el cuaderno <code class="docutils literal notranslate"><span class="pre">Limpieza.ipynb</span></code>, donde se ejecutaron y justificaron todas las decisiones tomadas en relación con la estructura del dataset.
+Para más información sobre la depuración y preparación del conjunto de datos, consulte la sección de <a class="reference internal" href="#procesamiento-de-los-datos"><span class="xref myst">Procesamiento de los datos</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Filtrar variables numéricas con al menos 2 valores distintos</span>
+<span class="n">num_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;number&#39;</span><span class="p">)</span>
+<span class="n">num_cols</span> <span class="o">=</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Correlación y heatmap</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">18</span><span class="p">))</span>  <span class="c1"># Ajusta tamaño según cantidad de columnas</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
+    <span class="n">num_cols</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;rocket&#39;</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">annot</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Mapa de calor de correlaciones - variables numéricas con varianza&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/0f98dc674eca08866c3d1e66a8774dec59458d849e69012fb0f4b61e80fbcaae.png" src="_images/0f98dc674eca08866c3d1e66a8774dec59458d849e69012fb0f4b61e80fbcaae.png" />
+</div>
+</div>
+<p>Con el objetivo de verificar visualmente la eficacia del procedimiento de reducción de multicolinealidad, se presenta a continuación el mapa de calor de correlaciones entre todas las variables numéricas del dataset final que conservan varianza. Se observa que, tras la eliminación iterativa de variables con alto Factor de Inflación de Varianza (VIF), las correlaciones lineales entre las variables restantes son, en general, moderadas o bajas. Este resultado valida la consistencia del proceso de depuración, ya que no se identifican agrupaciones de variables con correlaciones cercanas a ±1, lo que garantiza una mayor estabilidad en los modelos de clasificación que se construirán posteriormente.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ver primeras filas</span>
@@ -635,15 +736,19 @@ Series([], dtype: int64)
 </div>
 </div>
 </div>
+<p>Luego de verificar visualmente las correlaciones entre las variables numéricas mediante el mapa de calor, se presenta a continuación un resumen estructural del dataset final. Se observa que el conjunto de datos contiene un total de 73 variables, de las cuales 71 son numéricas (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) y 2 categóricas (<code class="docutils literal notranslate"><span class="pre">object</span></code>). Además, tras el proceso de imputación y depuración descrito previamente, se confirma que ya no existen valores nulos en ninguna columna, lo que garantiza la completitud del conjunto de datos y lo habilita para su análisis exploratorio y posterior modelado.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reafirmar columnas categóricas tipo object</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Reafirmar columnas categóricas tipo object</span>
 <span class="n">categorical_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;object&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <span class="c1"># Total de filas</span>
 <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-<span class="c1"># Recorrer cada columna categórica y mostrar valores únicos + porcentaje</span>
+<span class="c1"># Recorrer cada columna categórica y mostrar valores únicos + porcentaje + gráfico</span>
 <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">categorical_cols</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> ===&quot;</span><span class="p">)</span>
     <span class="n">counts</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -654,6 +759,16 @@ Series([], dtype: int64)
         <span class="s1">&#39;Porcentaje&#39;</span><span class="p">:</span> <span class="n">percentages</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="p">})</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+    <span class="c1"># Crear gráfico de barras</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">counts</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Distribución de </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Valor&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Frecuencia&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -663,8 +778,10 @@ Series([], dtype: int64)
 id_38                              
 F         F       77170        53.5
 T         T       67063        46.5
-
-=== card6 ===
+</pre></div>
+</div>
+<img alt="_images/984fe6d5e4291b16e4fe89e0b51d24622ef0452fff594591c61d65728e1a30f4.png" src="_images/984fe6d5e4291b16e4fe89e0b51d24622ef0452fff594591c61d65728e1a30f4.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>=== card6 ===
                    Valor  Frecuencia  Porcentaje
 card6                                           
 credit            credit       75268       52.19
@@ -672,6 +789,7 @@ debit              debit       68950       47.80
 charge card  charge card          15        0.01
 </pre></div>
 </div>
+<img alt="_images/4a58564280b89ab68643a27eb84d2519283bccb3f6371f60eeb81d41000ac822.png" src="_images/4a58564280b89ab68643a27eb84d2519283bccb3f6371f60eeb81d41000ac822.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -694,6 +812,8 @@ Name: proportion, dtype: float64
 </div>
 </div>
 </div>
+<p>Se identificó que la categoría “charge card” en la variable <code class="docutils literal notranslate"><span class="pre">card6</span></code> tenía una frecuencia extremadamente baja (15 registros, 0.01%). Por esta razón, se optó por eliminar estos registros, ya que las categorías con muy baja representación pueden introducir ruido y no aportan valor estadístico al modelo.
+Tras la limpieza, el dataset quedó con 144,218 registros, y se mantuvo una distribución balanceada entre “credit” (52.19%) y “debit” (47.81%).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">info</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
@@ -789,17 +909,93 @@ Name: proportion, dtype: float64
 </div>
 </div>
 </div>
+<p>Aunque el tipo de dato de la mayoría de las variables en el dataset es <code class="docutils literal notranslate"><span class="pre">float64</span></code>, esto no implica que todas ellas sean numéricas en su naturaleza. De acuerdo con la documentación del proveedor de datos, un número considerable de variables han sido codificadas desde categorías originales (por ejemplo, indicadores binarios, codificaciones de identidad, relaciones entre entidades o correspondencias de usuario). Este es el caso, por ejemplo, de las variables <code class="docutils literal notranslate"><span class="pre">M1</span></code> a <code class="docutils literal notranslate"><span class="pre">M9</span></code>, <code class="docutils literal notranslate"><span class="pre">id_12</span></code> a <code class="docutils literal notranslate"><span class="pre">id_38</span></code>, así como muchas de las variables <code class="docutils literal notranslate"><span class="pre">Vxxx</span></code>, cuyo significado exacto no es público.</p>
+<p>Solamente algunas variables pueden asumirse con certeza como numéricas continuas: entre ellas se encuentran <code class="docutils literal notranslate"><span class="pre">TransactionAMT</span></code> (monto de la transacción), <code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code> (tiempo relativo de la transacción), y algunas variables derivadas de diferencia temporal como <code class="docutils literal notranslate"><span class="pre">D1</span></code>, <code class="docutils literal notranslate"><span class="pre">D8</span></code> y <code class="docutils literal notranslate"><span class="pre">D9</span></code>. Estas variables reflejan cantidades medibles o intervalos reales y no surgen de procesos de codificación categórica.</p>
+<p>Este aspecto constituye una limitación importante durante el análisis exploratorio, ya que impide aplicar ciertas técnicas estadísticas sin antes validar o reinterpretar el significado de las variables involucradas. Por tanto, en lo que sigue, los análisis serán aplicados de forma diferenciada, considerando esta ambigüedad en la interpretación de los datos codificados.</p>
+<p>Veamos a continuación, el resto del análisis considerando la variable objetivo <code class="docutils literal notranslate"><span class="pre">isfraud</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Lista final de variables</span>
-<span class="n">vars_outliers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transactionamt&#39;</span><span class="p">,</span> <span class="s1">&#39;d1&#39;</span><span class="p">,</span> <span class="s1">&#39;d8&#39;</span><span class="p">,</span> <span class="s1">&#39;v159&#39;</span><span class="p">,</span> <span class="s1">&#39;v160&#39;</span><span class="p">,</span> <span class="s1">&#39;v274&#39;</span><span class="p">,</span> <span class="s1">&#39;v277&#39;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Conteo y porcentaje de cada clase</span>
+<span class="n">conteo</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;isfraud&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">porcentaje</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;isfraud&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<span class="c1"># Mostrar resumen en texto</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Distribución de la variable &#39;isFraud&#39;:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">clase</span> <span class="ow">in</span> <span class="n">conteo</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clase </span><span class="si">{</span><span class="n">clase</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">conteo</span><span class="p">[</span><span class="n">clase</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> transacciones (</span><span class="si">{</span><span class="n">porcentaje</span><span class="p">[</span><span class="n">clase</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Distribución de la variable &#39;isFraud&#39;:
 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vars_outliers</span><span class="p">):</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Boxplot - </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+Clase 0.0 -&gt; 132,915 transacciones (92.15%)
+Clase 1.0 -&gt; 11,318 transacciones (7.85%)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">countplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;isfraud&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Distribución de Transacciones Fraudulentas&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;¿Es fraude? (0 = No, 1 = Sí)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Cantidad de transacciones&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;No Fraude&#39;</span><span class="p">,</span> <span class="s1">&#39;Fraude&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/23290b6e65410908fabfbc968f28a5ff227b15b5b40e4cc58ca011cae1f24ceb.png" src="_images/23290b6e65410908fabfbc968f28a5ff227b15b5b40e4cc58ca011cae1f24ceb.png" />
+</div>
+</div>
+<p>La distribución de la variable <code class="docutils literal notranslate"><span class="pre">isFraud</span></code> revela un claro desbalance de clases: aproximadamente el 92% de las transacciones corresponden a casos no fraudulentos, mientras que solo el 8% son clasificadas como fraude. Esta desproporción puede afectar el desempeño de los modelos de clasificación, ya que las clases mayoritarias tienden a dominar las predicciones si no se aplican estrategias correctivas. Por esta razón, más adelante se implementarán técnicas de balanceo que permitirán mitigar este sesgo y mejorar la sensibilidad del modelo frente a la clase minoritaria.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Asegurar que tengas la variable de hora</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;transaction_hour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;transactiondt&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">3600</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># Agrupar por hora y contar cantidad total de transacciones</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;transaction_hour&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+<span class="c1"># Graficar</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">counts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;steelblue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Distribución total de transacciones por hora virtual&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Hora (desde el inicio del dataset)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Número de transacciones&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/f97dbe9b2bde2f20f4516700e0d3dfbc717d20b76d575f76de2d99d5fb589056.png" src="_images/f97dbe9b2bde2f20f4516700e0d3dfbc717d20b76d575f76de2d99d5fb589056.png" />
+</div>
+</div>
+<p>La variable <code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code> corresponde a un intervalo de tiempo medido a partir de una fecha y hora de referencia no especificada. Aunque no se detalla su unidad de medida oficial, su comportamiento creciente y el orden secuencial de los registros sugieren que podría representar una magnitud temporal como segundos o minutos. No obstante, dado que esta información no está explícitamente definida, no se asume ninguna escala temporal absoluta.</p>
+<p>Para facilitar su análisis, se realizó una transformación sobre esta variable con el fin de obtener una versión más interpretable: la denominada “hora virtual”. Esta transformación consistió en dividir cada valor de <code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code> entre 3600, asumiendo operativamente que el dato representaba segundos, aunque sin pretender establecer correspondencia con una hora real. La finalidad de este procedimiento fue simplemente agrupar los registros en bloques temporales más comprensibles.</p>
+<p>El gráfico generado a partir de esta nueva variable muestra la distribución total de transacciones a lo largo del tiempo registrado en el dataset. Se observa una marcada concentración de actividad durante las primeras horas virtuales, seguida de una fase de menor volumen y mayor estabilidad. Este patrón evidencia que la actividad transaccional no fue homogénea en el tiempo y refuerza la utilidad de esta transformación para identificar comportamientos relevantes o posibles anomalías temporales.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Lista de variables para histograma</span>
+<span class="n">vars_hist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transactionamt&#39;</span><span class="p">,</span> <span class="s1">&#39;id_02&#39;</span><span class="p">,</span> <span class="s1">&#39;d1&#39;</span><span class="p">,</span> <span class="s1">&#39;card1&#39;</span><span class="p">]</span>
+
+<span class="c1"># Graficar</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vars_hist</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Distribución de </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Frecuencia&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -807,9 +1003,122 @@ Name: proportion, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/6d04d621df827dfdb225d0f5191cef956b9771fd5fbed5c54b17746702d42611.png" src="_images/6d04d621df827dfdb225d0f5191cef956b9771fd5fbed5c54b17746702d42611.png" />
+<img alt="_images/dca67226ebf637bd4e407c8fabc846273c8206b1b447d466778f87dead12c94b.png" src="_images/dca67226ebf637bd4e407c8fabc846273c8206b1b447d466778f87dead12c94b.png" />
 </div>
 </div>
+<p>En esta sección se presentan los histogramas de cuatro variables con representación numérica: <code class="docutils literal notranslate"><span class="pre">transactionamt</span></code>, <code class="docutils literal notranslate"><span class="pre">id_02</span></code>, <code class="docutils literal notranslate"><span class="pre">d1</span></code> y <code class="docutils literal notranslate"><span class="pre">card1</span></code>. De acuerdo con la documentación, <code class="docutils literal notranslate"><span class="pre">transactionamt</span></code> corresponde al importe de la transacción en dólares estadounidenses, por lo que puede considerarse una variable numérica continua real. En este caso, el uso de un histograma es pertinente y revela una distribución fuertemente asimétrica hacia la derecha, con una alta concentración de montos bajos y algunos valores extremos, posiblemente correspondientes a pagos atípicos o devoluciones.</p>
+<p>Por su parte, la variable <code class="docutils literal notranslate"><span class="pre">id_02</span></code> pertenece al conjunto <code class="docutils literal notranslate"><span class="pre">id_12</span></code> a <code class="docutils literal notranslate"><span class="pre">id_38</span></code>, las cuales corresponden a identificadores codificados relacionados con información digital del usuario o del dispositivo. Aunque su formato es numérico, su naturaleza es categórica codificada, por lo que un histograma tradicional pierde valor interpretativo directo. No obstante, observar su distribución permite detectar la existencia de valores dominantes o dispersión extrema, útil para identificar la necesidad de transformaciones o reducción de cardinalidad.</p>
+<p>La variable <code class="docutils literal notranslate"><span class="pre">d1</span></code>, según la documentación, representa un intervalo de tiempo asociado a cada registro, posiblemente en días, aunque no se especifica con claridad respecto a qué evento se mide. Su formato es numérico y discreto, con una concentración marcada en valores bajos, lo que sugiere que muchas observaciones presentan un tiempo corto respecto al evento de referencia. El histograma correspondiente permite visualizar esta acumulación y observar la proporción de casos que presentan intervalos prolongados.</p>
+<p>Finalmente, <code class="docutils literal notranslate"><span class="pre">card1</span></code> corresponde a un identificador vinculado a la tarjeta del usuario (posiblemente un hash o codificación del emisor o tipo de tarjeta). Su apariencia numérica no refleja una cantidad medible, sino una codificación categórica de alta cardinalidad. Por lo tanto, aunque se grafica como histograma, su interpretación debe limitarse a la detección de frecuencias relativas por categoría codificada, y no como variable continua. En este tipo de variables, otros enfoques como el conteo de valores únicos o su relación directa con la variable objetivo suelen ser más adecuados.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># Variables que sí tienen sentido en boxplot univariado</span>
+<span class="n">vars_box</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transactionamt&#39;</span><span class="p">,</span> <span class="s1">&#39;d1&#39;</span><span class="p">]</span>
+
+<span class="c1"># Crear figura</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># Boxplots individuales</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vars_box</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;skyblue&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Boxplot de </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/6b056b6206c304642ac11937c3eb41ece41dcfd13a1ab1c4bf91d3b9af5d19fd.png" src="_images/6b056b6206c304642ac11937c3eb41ece41dcfd13a1ab1c4bf91d3b9af5d19fd.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Resumen estadístico de transactionamt y d1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resumen estadístico de &#39;transactionamt&#39;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;transactionamt&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Resumen estadístico de &#39;transactionamt&#39;
+
+       transactionamt
+count   144233.000000
+mean        83.554533
+std         99.850258
+min          0.251000
+25%         25.453000
+50%         50.000000
+75%        100.000000
+max       1800.000000
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># Detectar columnas D1 a D15 válidas </span>
+<span class="n">d_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span>
+<span class="n">d_validas</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">d_cols</span> <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.8</span> <span class="ow">and</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Graficar histogramas de las variables D seleccionadas</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">d_validas</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">)))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">d_validas</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">d_validas</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;skyblue&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Histograma de </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Frecuencia&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8cb5460ae7ff2444dd4fd7014dc315f1b498fb82ddbd51504e4fa877c7df0cfb.png" src="_images/8cb5460ae7ff2444dd4fd7014dc315f1b498fb82ddbd51504e4fa877c7df0cfb.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Seleccionar todas las columnas que comienzan con &#39;d&#39; seguido de número</span>
+<span class="n">d_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span>
+
+<span class="c1"># Mostrar resumen estadístico</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resumen estadístico de las variables D1 a D15:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">d_cols</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Resumen estadístico de las variables D1 a D15:
+
+                  d1             d8             d9
+count  144233.000000  144233.000000  144233.000000
+mean       29.330390     172.600160       0.553671
+std        95.150487     182.358745       0.240271
+min         0.000000       0.000000       0.000000
+25%         0.000000      29.083332       0.483333
+50%         0.000000     146.058108       0.561057
+75%         0.000000     221.791669       0.708333
+max       640.000000    1707.791626       0.958333
+</pre></div>
+</div>
+</div>
+</div>
+<p>Las variables <code class="docutils literal notranslate"><span class="pre">d1</span></code>, <code class="docutils literal notranslate"><span class="pre">d8</span></code> y <code class="docutils literal notranslate"><span class="pre">d9</span></code> forman parte del conjunto <code class="docutils literal notranslate"><span class="pre">D1</span></code> a <code class="docutils literal notranslate"><span class="pre">D15</span></code>, asociadas a intervalos de tiempo entre eventos. Todas fueron incluidas en el modelo sin transformación previa, ya que su formato numérico era compatible y no requería codificación adicional.</p>
+<p>En el caso de <code class="docutils literal notranslate"><span class="pre">d1</span></code>, se observa una fuerte concentración en valores bajos, con más del 75% de los registros en cero y presencia de valores atípicos. <code class="docutils literal notranslate"><span class="pre">d8</span></code> presenta mayor dispersión, con una mediana intermedia y valores máximos elevados. Por su parte, <code class="docutils literal notranslate"><span class="pre">d9</span></code> tiene un rango acotado entre 0 y 1, y aunque su significado no es completamente claro, su comportamiento discreto sugiere que podría representar proporciones o una codificación binaria. En todos los casos, su inclusión se justificó por su carácter numérico y por conservar variabilidad suficiente.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Usamos la columna original o la winsorizada</span>
@@ -899,27 +1208,134 @@ Conclusión: Rechazamos H0 → no es normal
 </div>
 </div>
 </div>
+<p>La variable <code class="docutils literal notranslate"><span class="pre">transactionamt</span></code>, que representa el valor monetario de cada transacción en dólares estadounidenses, presentó desde el inicio una distribución altamente asimétrica, con la mayoría de los valores concentrados en montos bajos y una cola extendida de transacciones con valores significativamente más altos. Este comportamiento fue confirmado tanto visualmente como mediante el test de Anderson-Darling, que permitió rechazar la hipótesis nula de normalidad.</p>
+<p>Dado que esta variable es continua, estrictamente positiva y sensible a valores extremos, se consideró apropiado aplicar una transformación logarítmica. Para ello, se utilizó la función <code class="docutils literal notranslate"><span class="pre">log1p</span></code>, que implementa la transformación <code class="docutils literal notranslate"><span class="pre">log(1</span> <span class="pre">+</span> <span class="pre">x)</span></code>, lo cual permite estabilizar la varianza sin generar errores al procesar valores cercanos a cero. La variable transformada (<code class="docutils literal notranslate"><span class="pre">transactionamt_log</span></code>) mostró una estructura más simétrica y comprimió los valores atípicos, haciendo más robusta su participación en modelos que pueden verse afectados por escalas desproporcionadas. En consecuencia, fue esta versión transformada (<code class="docutils literal notranslate"><span class="pre">transactionamt_log</span></code>) la que se incorporó al conjunto de entrenamiento. Se descartó el uso de la variable original ya que su distribución severamente sesgada podía inducir sesgos en algoritmos lineales o afectar el rendimiento de modelos que asumen cierta homogeneidad en la escala de los predictores.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Eliminar columna original si ya no se usará</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;transactionamt&#39;</span><span class="p">])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="c1"># Renombrar la transformada para mantener consistencia</span>
-<span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;transactionamt_log&#39;</span><span class="p">:</span> <span class="s1">&#39;transactionamt&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Paso 1: crear la columna de hora virtual</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;transaction_hour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;transactiondt&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">3600</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
-<span class="c1"># Guardar</span>
-<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;fraude_final.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># Paso 2: agrupar por hora y clase</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;transaction_hour&#39;</span><span class="p">,</span> <span class="s1">&#39;isfraud&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataset guardado como &#39;fraude_final.csv&#39; con la versión logarítmica.&quot;</span><span class="p">)</span>
+<span class="c1"># Paso 3: graficar</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;No Fraude&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;royalblue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Fraude&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;firebrick&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Distribución temporal de transacciones por hora virtual&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Horas desde el inicio del dataset&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Número de transacciones&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Dataset guardado como &#39;fraude_final.csv&#39; con la versión logarítmica.
+<img alt="_images/b8d3873c0afc747c9ed47b84dfa7e91169ebfbb21670097dc880c2ae0232ee72.png" src="_images/b8d3873c0afc747c9ed47b84dfa7e91169ebfbb21670097dc880c2ae0232ee72.png" />
+</div>
+</div>
+<p>Con base en la variable <code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code> previamente transformada a una escala de “hora virtual”, se generó una nueva visualización que incorpora la variable objetivo <code class="docutils literal notranslate"><span class="pre">isfraud</span></code>. Esta partición permite comparar directamente el comportamiento temporal de las transacciones legítimas y fraudulentas a lo largo del tiempo registrado en el dataset.</p>
+<p>El gráfico evidencia que, aunque ambas clases comparten la misma tendencia general de concentración en las primeras horas virtuales, las transacciones fraudulentas son considerablemente menos frecuentes. Esta superposición permite detectar diferencias de densidad y posibles patrones temporales particulares asociados al fraude. La representación diferenciada refuerza la utilidad de <code class="docutils literal notranslate"><span class="pre">transaction_hour</span></code> como variable explicativa en modelos de clasificación, al capturar dinámicas relevantes en la ocurrencia del fraude en función del tiempo.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;id_01&#39;, &#39;id_02&#39;, &#39;id_05&#39;, &#39;id_06&#39;, &#39;id_09&#39;, &#39;id_10&#39;, &#39;id_19&#39;, &#39;id_20&#39;, &#39;isfraud&#39;, &#39;transactiondt&#39;, &#39;transactionamt&#39;, &#39;card1&#39;, &#39;card2&#39;, &#39;addr1&#39;, &#39;c3&#39;, &#39;c14&#39;, &#39;d1&#39;, &#39;d8&#39;, &#39;d9&#39;, &#39;v98&#39;, &#39;v124&#39;, &#39;v135&#39;, &#39;v138&#39;, &#39;v140&#39;, &#39;v141&#39;, &#39;v142&#39;, &#39;v146&#39;, &#39;v149&#39;, &#39;v152&#39;, &#39;v159&#39;, &#39;v160&#39;, &#39;v161&#39;, &#39;v162&#39;, &#39;v164&#39;, &#39;v169&#39;, &#39;v172&#39;, &#39;v173&#39;, &#39;v174&#39;, &#39;v175&#39;, &#39;v177&#39;, &#39;v184&#39;, &#39;v185&#39;, &#39;v208&#39;, &#39;v220&#39;, &#39;v223&#39;, &#39;v224&#39;, &#39;v225&#39;, &#39;v226&#39;, &#39;v227&#39;, &#39;v229&#39;, &#39;v238&#39;, &#39;v250&#39;, &#39;v261&#39;, &#39;v267&#39;, &#39;v271&#39;, &#39;v274&#39;, &#39;v277&#39;, &#39;v281&#39;, &#39;v282&#39;, &#39;v286&#39;, &#39;v287&#39;, &#39;v289&#39;, &#39;v291&#39;, &#39;v296&#39;, &#39;v301&#39;, &#39;v311&#39;, &#39;v313&#39;, &#39;v314&#39;, &#39;v326&#39;, &#39;v335&#39;, &#39;v338&#39;, &#39;id_38&#39;, &#39;card6&#39;, &#39;transaction_hour&#39;]
 </pre></div>
 </div>
 </div>
 </div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># Lista completa de tus variables</span>
+<span class="n">columnas</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id_01&#39;</span><span class="p">,</span> <span class="s1">&#39;id_02&#39;</span><span class="p">,</span> <span class="s1">&#39;id_05&#39;</span><span class="p">,</span> <span class="s1">&#39;id_06&#39;</span><span class="p">,</span> <span class="s1">&#39;id_09&#39;</span><span class="p">,</span> <span class="s1">&#39;id_10&#39;</span><span class="p">,</span> <span class="s1">&#39;id_19&#39;</span><span class="p">,</span> <span class="s1">&#39;id_20&#39;</span><span class="p">,</span> <span class="s1">&#39;isfraud&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;transactiondt&#39;</span><span class="p">,</span> <span class="s1">&#39;transactionamt&#39;</span><span class="p">,</span> <span class="s1">&#39;card1&#39;</span><span class="p">,</span> <span class="s1">&#39;card2&#39;</span><span class="p">,</span> <span class="s1">&#39;addr1&#39;</span><span class="p">,</span> <span class="s1">&#39;c3&#39;</span><span class="p">,</span> <span class="s1">&#39;c14&#39;</span><span class="p">,</span> <span class="s1">&#39;d1&#39;</span><span class="p">,</span> <span class="s1">&#39;d8&#39;</span><span class="p">,</span> <span class="s1">&#39;d9&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;v98&#39;</span><span class="p">,</span> <span class="s1">&#39;v124&#39;</span><span class="p">,</span> <span class="s1">&#39;v135&#39;</span><span class="p">,</span> <span class="s1">&#39;v138&#39;</span><span class="p">,</span> <span class="s1">&#39;v140&#39;</span><span class="p">,</span> <span class="s1">&#39;v141&#39;</span><span class="p">,</span> <span class="s1">&#39;v142&#39;</span><span class="p">,</span> <span class="s1">&#39;v146&#39;</span><span class="p">,</span> <span class="s1">&#39;v149&#39;</span><span class="p">,</span> <span class="s1">&#39;v152&#39;</span><span class="p">,</span> <span class="s1">&#39;v159&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;v160&#39;</span><span class="p">,</span> <span class="s1">&#39;v161&#39;</span><span class="p">,</span> <span class="s1">&#39;v162&#39;</span><span class="p">,</span> <span class="s1">&#39;v164&#39;</span><span class="p">,</span> <span class="s1">&#39;v169&#39;</span><span class="p">,</span> <span class="s1">&#39;v172&#39;</span><span class="p">,</span> <span class="s1">&#39;v173&#39;</span><span class="p">,</span> <span class="s1">&#39;v174&#39;</span><span class="p">,</span> <span class="s1">&#39;v175&#39;</span><span class="p">,</span> <span class="s1">&#39;v177&#39;</span><span class="p">,</span> <span class="s1">&#39;v184&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;v185&#39;</span><span class="p">,</span> <span class="s1">&#39;v208&#39;</span><span class="p">,</span> <span class="s1">&#39;v220&#39;</span><span class="p">,</span> <span class="s1">&#39;v223&#39;</span><span class="p">,</span> <span class="s1">&#39;v224&#39;</span><span class="p">,</span> <span class="s1">&#39;v225&#39;</span><span class="p">,</span> <span class="s1">&#39;v226&#39;</span><span class="p">,</span> <span class="s1">&#39;v227&#39;</span><span class="p">,</span> <span class="s1">&#39;v229&#39;</span><span class="p">,</span> <span class="s1">&#39;v238&#39;</span><span class="p">,</span> <span class="s1">&#39;v250&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;v261&#39;</span><span class="p">,</span> <span class="s1">&#39;v267&#39;</span><span class="p">,</span> <span class="s1">&#39;v271&#39;</span><span class="p">,</span> <span class="s1">&#39;v274&#39;</span><span class="p">,</span> <span class="s1">&#39;v277&#39;</span><span class="p">,</span> <span class="s1">&#39;v281&#39;</span><span class="p">,</span> <span class="s1">&#39;v282&#39;</span><span class="p">,</span> <span class="s1">&#39;v286&#39;</span><span class="p">,</span> <span class="s1">&#39;v287&#39;</span><span class="p">,</span> <span class="s1">&#39;v289&#39;</span><span class="p">,</span> <span class="s1">&#39;v291&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;v296&#39;</span><span class="p">,</span> <span class="s1">&#39;v301&#39;</span><span class="p">,</span> <span class="s1">&#39;v311&#39;</span><span class="p">,</span> <span class="s1">&#39;v313&#39;</span><span class="p">,</span> <span class="s1">&#39;v314&#39;</span><span class="p">,</span> <span class="s1">&#39;v326&#39;</span><span class="p">,</span> <span class="s1">&#39;v335&#39;</span><span class="p">,</span> <span class="s1">&#39;v338&#39;</span><span class="p">,</span> <span class="s1">&#39;id_38&#39;</span><span class="p">,</span> <span class="s1">&#39;card6&#39;</span><span class="p">,</span> <span class="s1">&#39;transaction_hour&#39;</span><span class="p">]</span>
+
+<span class="c1"># Graficar proporciones de fraude para columnas con baja cardinalidad</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columnas</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">50</span> <span class="ow">and</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">&#39;isfraud&#39;</span><span class="p">:</span>
+        <span class="n">proporciones</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">col</span><span class="p">)[</span><span class="s1">&#39;isfraud&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">proporciones</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">proporciones</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Proporción de fraude por valor en: </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Proporción de fraude&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/d8ecbe297fbe4718c7924826c31de864a61e8ef5a6189c65de587518d2286ab8.png" src="_images/d8ecbe297fbe4718c7924826c31de864a61e8ef5a6189c65de587518d2286ab8.png" />
+<img alt="_images/3cec29578af799c5d38b4662b858e9918862a968dd8957de975efd4998e5836f.png" src="_images/3cec29578af799c5d38b4662b858e9918862a968dd8957de975efd4998e5836f.png" />
+<img alt="_images/2273a4bd559d81ca90c346911728b72b7e49a396c95dfa931ef8c39849044662.png" src="_images/2273a4bd559d81ca90c346911728b72b7e49a396c95dfa931ef8c39849044662.png" />
+<img alt="_images/0049b7fcc3735ea838b19b8b0b191d175f8499ca35a7c2675ea9e4793bf5176c.png" src="_images/0049b7fcc3735ea838b19b8b0b191d175f8499ca35a7c2675ea9e4793bf5176c.png" />
+<img alt="_images/8c593e4c9ba1360f0829de6cf2cedf5e92f5b272ac8e53c3bb7e73815eff5b13.png" src="_images/8c593e4c9ba1360f0829de6cf2cedf5e92f5b272ac8e53c3bb7e73815eff5b13.png" />
+<img alt="_images/1701c7bfab823c488cd644b658753212aa39d5c8f4eb1fce8a668e3b3d42357f.png" src="_images/1701c7bfab823c488cd644b658753212aa39d5c8f4eb1fce8a668e3b3d42357f.png" />
+<img alt="_images/228c5b34ad9fc93f899e40148bae47eec86e3f0fb20a1695feb9026558b7f878.png" src="_images/228c5b34ad9fc93f899e40148bae47eec86e3f0fb20a1695feb9026558b7f878.png" />
+<img alt="_images/4f27668fcbadc4f3f226d2b0acaaccfea653d35198623abcb850b1900987c745.png" src="_images/4f27668fcbadc4f3f226d2b0acaaccfea653d35198623abcb850b1900987c745.png" />
+<img alt="_images/9e3b3ab2c0a5b890058935fc85f6fa0ad6f6c49fbc450ceb412dbcb193870ac3.png" src="_images/9e3b3ab2c0a5b890058935fc85f6fa0ad6f6c49fbc450ceb412dbcb193870ac3.png" />
+<img alt="_images/74dd831a037f06b72aa1b69f0fe4e52dbf10f1b5387739d686fee9784d3c592d.png" src="_images/74dd831a037f06b72aa1b69f0fe4e52dbf10f1b5387739d686fee9784d3c592d.png" />
+<img alt="_images/fcdd3bbe6f0415dfcd631089ddfd107d88ef297eb2e08b996d2256006579c8d5.png" src="_images/fcdd3bbe6f0415dfcd631089ddfd107d88ef297eb2e08b996d2256006579c8d5.png" />
+<img alt="_images/554fd4c1bd31a0ec7a7a0984f34f59b5b95c7c1b1d72129ab9d11dc5936283d2.png" src="_images/554fd4c1bd31a0ec7a7a0984f34f59b5b95c7c1b1d72129ab9d11dc5936283d2.png" />
+<img alt="_images/d1e2514bb2695962c7d8758b553bd2df8a55fe38791df797266f29d9be4a6dac.png" src="_images/d1e2514bb2695962c7d8758b553bd2df8a55fe38791df797266f29d9be4a6dac.png" />
+<img alt="_images/023041c7031b0ba7006e248e2ba1daa62db90c8030d344f5c3cb2357adc72196.png" src="_images/023041c7031b0ba7006e248e2ba1daa62db90c8030d344f5c3cb2357adc72196.png" />
+<img alt="_images/ac7eb9a59f759929e5e40dda82e6c8a58e7f4e9057e6064fe1ffb7ba5ff683a2.png" src="_images/ac7eb9a59f759929e5e40dda82e6c8a58e7f4e9057e6064fe1ffb7ba5ff683a2.png" />
+<img alt="_images/d36ee9ad81c856ef14b2b963a35a236d655952191c8137b1cf15a4ae27927d15.png" src="_images/d36ee9ad81c856ef14b2b963a35a236d655952191c8137b1cf15a4ae27927d15.png" />
+<img alt="_images/31aa9da83134be64ed7a7a968f509f64f03a46bb2a480666e34c4846d68488f0.png" src="_images/31aa9da83134be64ed7a7a968f509f64f03a46bb2a480666e34c4846d68488f0.png" />
+<img alt="_images/93aa1212d139c12a7a5a98b51385b4840a730de9b40335ca50db8f1ee933687b.png" src="_images/93aa1212d139c12a7a5a98b51385b4840a730de9b40335ca50db8f1ee933687b.png" />
+<img alt="_images/d0ac14308fbfffed385972cc57ef851192ec28d6c3e1d49c796447e27139ef00.png" src="_images/d0ac14308fbfffed385972cc57ef851192ec28d6c3e1d49c796447e27139ef00.png" />
+<img alt="_images/5151a2124980b9dab146a9562864e35ce08bb9d4b8e8c99af5e6b070b0e5a495.png" src="_images/5151a2124980b9dab146a9562864e35ce08bb9d4b8e8c99af5e6b070b0e5a495.png" />
+<img alt="_images/cdcbd3254cee8cb987306aa297d929ef2d6110af852bd336790b84256264eb7e.png" src="_images/cdcbd3254cee8cb987306aa297d929ef2d6110af852bd336790b84256264eb7e.png" />
+<img alt="_images/bd655be986185d007557bfaccc980aacfca5ac823ed299113e4bb9dce5a181df.png" src="_images/bd655be986185d007557bfaccc980aacfca5ac823ed299113e4bb9dce5a181df.png" />
+<img alt="_images/76bed9621fb56d861e35554ff2a141c3b0211dcc9425f2d27ba123fb6b990f30.png" src="_images/76bed9621fb56d861e35554ff2a141c3b0211dcc9425f2d27ba123fb6b990f30.png" />
+<img alt="_images/e4b78debd7b08694297c2bc105acd7413273f2bda01553a0ae4230b13132e189.png" src="_images/e4b78debd7b08694297c2bc105acd7413273f2bda01553a0ae4230b13132e189.png" />
+<img alt="_images/39a223ab05c0cf06ddfb7d1753ec22930df44905f389e8dc5e8e76cd44b7fdbf.png" src="_images/39a223ab05c0cf06ddfb7d1753ec22930df44905f389e8dc5e8e76cd44b7fdbf.png" />
+<img alt="_images/bbbbfb94d668daf4ad99e615fbf309a83580502251b92e84a42ef1058bc3fdc4.png" src="_images/bbbbfb94d668daf4ad99e615fbf309a83580502251b92e84a42ef1058bc3fdc4.png" />
+<img alt="_images/47ec90bfd453550489b0a8364c0fd6342f9ab6f89064d9ca3a94af6c016adf30.png" src="_images/47ec90bfd453550489b0a8364c0fd6342f9ab6f89064d9ca3a94af6c016adf30.png" />
+</div>
+</div>
+<p>A partir de las gráficas generadas que representan la proporción de fraude por valor específico en distintas variables con baja cardinalidad, se pueden observar patrones interesantes de asociación entre ciertos valores y la variable objetivo <code class="docutils literal notranslate"><span class="pre">isfraud</span></code>. La mayoría de las variables analizadas provienen del grupo codificado como <code class="docutils literal notranslate"><span class="pre">vXXX</span></code>, correspondiente a funciones de la plataforma Vesta relacionadas con clasificaciones y relaciones entre entidades. Por ejemplo, variables como <code class="docutils literal notranslate"><span class="pre">v124</span></code>, <code class="docutils literal notranslate"><span class="pre">v142</span></code>, <code class="docutils literal notranslate"><span class="pre">v146</span></code> o <code class="docutils literal notranslate"><span class="pre">v238</span></code> muestran una concentración significativa de fraude en un subconjunto reducido de valores, con proporciones que incluso alcanzan el 100% para ciertos casos, lo que sugiere que pueden tener una alta capacidad discriminativa si se utilizan adecuadamente en el modelo.</p>
+<p>Este análisis resulta útil para detectar valores que podrían estar correlacionados con transacciones fraudulentas, especialmente en contextos donde la variable original ha sido codificada y no se tiene una interpretación directa. A pesar de ello, hay que tener en cuenta que no todas las variables mostraron un patrón claro; algunas como <code class="docutils literal notranslate"><span class="pre">c3</span></code> o <code class="docutils literal notranslate"><span class="pre">v286</span></code> presentan una distribución mucho más homogénea o irrelevante.</p>
+<p>Estos hallazgos respaldan la necesidad de tratar estas variables con criterios adicionales (como su relevancia estadística o mediante técnicas automáticas de selección) en lugar de descartar a priori por su naturaleza codificada. En definitiva, este enfoque permite rescatar señales útiles incluso en variables no interpretables directamente.</p>
+<section id="transformacion-final">
+<h3><strong>Transformación final</strong><a class="headerlink" href="#transformacion-final" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd"># Eliminar columna original si ya no se usará</span>
+<span class="sd">df = df.drop(columns=[&#39;transactionamt&#39;])</span>
+
+<span class="sd"># Renombrar la transformada para mantener consistencia</span>
+<span class="sd">df.rename(columns={&#39;transactionamt_log&#39;: &#39;transactionamt&#39;}, inplace=True)</span>
+
+<span class="sd"># Guardar</span>
+<span class="sd">df.to_csv(&quot;fraude_final.csv&quot;, index=False)</span>
+
+<span class="sd">print(&quot;Dataset guardado como &#39;fraude_final.csv&#39; con la versión logarítmica.&quot;)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 </section>
 
@@ -988,6 +1404,10 @@ Conclusión: Rechazamos H0 → no es normal
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#librerias"><strong>Librerias</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contextualizacion-del-conjunto-de-datos"><strong>Contextualización del Conjunto de Datos</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#transformacion-final"><strong>Transformación final</strong></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
