@@ -1,7 +1,6 @@
-# ** Proyecto de Detección de Fraude**
+# **Proyecto de Detección de Fraude**
 
-Este proyecto tiene como objetivo desarrollar un sistema de detección de fraudes en transacciones de comercio electrónico, utilizando técnicas de aprendizaje automático y análisis exploratorio de datos. A partir de un conjunto de datos reales proporcionado por la plataforma **Vesta**, se aplica una metodología rigurosa que incluye limpieza de datos, análisis descriptivo, modelado supervisado y propuesta de soluciones optimizadas.
-
+Este proyecto tiene como objetivo desarrollar un sistema de detección de fraudes en transacciones de comercio electrónico, utilizando técnicas de aprendizaje automático y análisis exploratorio de datos. A partir de un conjunto de datos reales proporcionado por la plataforma **Vesta**, se aplica una metodología rigurosa que incluye limpieza de datos, análisis descriptivo, modelado supervisado y propuesta de modelado original
 ---
 
 ## **Estructura del Proyecto**
