@@ -507,6 +507,153 @@ Para más información sobre la depuración y preparación del conjunto de datos
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Filtrar variables numéricas con al menos 2 valores distintos</span>
+<span class="n">num_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;number&#39;</span><span class="p">)</span>
+<span class="n">num_cols</span> <span class="o">=</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># === Heatmap de correlaciones ===</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">18</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
+    <span class="n">num_cols</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;rocket&#39;</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">annot</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Mapa de calor de correlaciones - variables numéricas con varianza&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># === Mostrar correlaciones numéricas en modo texto (mayores a 0.5) ===</span>
+<span class="n">corr_matrix</span> <span class="o">=</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+<span class="n">corr_pairs</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">corr_matrix</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">corr_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">stack</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">corr_pairs</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Variable 1&#39;</span><span class="p">,</span> <span class="s1">&#39;Variable 2&#39;</span><span class="p">,</span> <span class="s1">&#39;Correlación&#39;</span><span class="p">]</span>
+<span class="n">corr_filtrada</span> <span class="o">=</span> <span class="n">corr_pairs</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">corr_pairs</span><span class="p">[</span><span class="s1">&#39;Correlación&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">]</span> \
+                    <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;Correlación&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Imprimir tabla de correlaciones significativas</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Correlaciones mayores a 0.5 en valor absoluto:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">corr_filtrada</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/0f98dc674eca08866c3d1e66a8774dec59458d849e69012fb0f4b61e80fbcaae.png" src="_images/0f98dc674eca08866c3d1e66a8774dec59458d849e69012fb0f4b61e80fbcaae.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Correlaciones mayores a 0.5 en valor absoluto:
+
+Variable 1 Variable 2  Correlación
+      v224       v225     0.965967
+      v164       v177     0.954704
+      v224       v267     0.895364
+      v152       v160     0.890158
+      v225       v267     0.884584
+      v224       v229     0.884220
+      v141       v142     0.878163
+      v225       v229     0.874259
+      v161       v162     0.871518
+      v159       v160     0.870647
+      v229       v267     0.864629
+      v152       v159     0.860561
+      v224       v261     0.858885
+      v229       v261     0.850337
+      v225       v261     0.838475
+      v184       v185     0.821148
+      v177       v296     0.816557
+      v261       v267     0.799711
+      v287       v326     0.799032
+      v164       v296     0.793871
+      v287       v296     0.778452
+      v175       v287     0.758639
+      v223       v225     0.758616
+      v296       v338     0.756296
+      v296       v314     0.739028
+      v184       v238     0.737623
+      v287       v314     0.730910
+      v296       v326     0.727250
+      v175       v296     0.725956
+      v173       v286     0.725714
+      v175       v314     0.699466
+      v224       v274     0.693257
+      v225       v274     0.690299
+      v174       v175     0.689083
+      v313       v314     0.679173
+      v223       v224     0.674981
+      v261       v274     0.674354
+      v164       v338     0.672205
+      v175       v326     0.664134
+      v281       v282     0.656495
+      v267       v274     0.643938
+      v326       v335     0.639892
+      v177       v338     0.639743
+      v208       v271     0.636628
+      v296       v335     0.634683
+      v223       v229     0.633456
+      v185       v238     0.632606
+      v177       v287     0.625557
+      v140       v146     0.624044
+      v314       v326     0.622134
+      v223       v267     0.615596
+      v146       v184     0.611748
+      v177       v314     0.609333
+      v175       v177     0.609105
+      v164       v287     0.607810
+      v164       v326     0.607710
+      v311       v335     0.605992
+      v164       v314     0.600569
+      v314       v335     0.600258
+      v169       v220     0.598832
+      v326       v338     0.597529
+      v140       v149     0.594980
+      v314       v338     0.594118
+      v287       v335     0.585948
+      v177       v326     0.583925
+      v287       v338     0.581178
+      v229       v274     0.580920
+      v164       v175     0.579825
+      v223       v261     0.568302
+      v226       v277     0.567166
+      v335       v338     0.564693
+      v138       v141     0.563459
+      v175       v338     0.563315
+      v164       v335     0.561641
+      v146       v185     0.557876
+      v142       v162     0.557749
+      v169       v174     0.550457
+      v175       v335     0.546097
+      v146       v238     0.545251
+      v184       v301     0.540186
+      v141       v162     0.539051
+      v124       v296     0.537689
+      v135       v277     0.537038
+      v177       v335     0.536207
+      v161       v208     0.524391
+      v267       v277     0.517790
+      v224       v277     0.510206
+      v141       v161     0.509031
+      v274       v277     0.508947
+      v146       v301     0.508298
+      v138       v161     0.506369
+      v135       v338     0.505540
+      v225       v277     0.504852
+      v174       v289     0.503687
+      v208       v313     0.502566
+       v98       v287     0.501089
+      v169       v281     0.500461
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="c1"># Filtrar variables numéricas con al menos 2 valores distintos</span>
 <span class="n">num_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;number&#39;</span><span class="p">)</span>
@@ -929,7 +1076,7 @@ Tras la limpieza, el dataset quedó con 144,218 registros, y se mantuvo una dist
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Distribución de la variable &#39;isFraud&#39;:
 
-Clase 0.0 -&gt; 132,915 transacciones (92.15%)
+Clase 0.0 -&gt; 132,900 transacciones (92.15%)
 Clase 1.0 -&gt; 11,318 transacciones (7.85%)
 </pre></div>
 </div>
@@ -949,7 +1096,7 @@ Clase 1.0 -&gt; 11,318 transacciones (7.85%)
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/23290b6e65410908fabfbc968f28a5ff227b15b5b40e4cc58ca011cae1f24ceb.png" src="_images/23290b6e65410908fabfbc968f28a5ff227b15b5b40e4cc58ca011cae1f24ceb.png" />
+<img alt="_images/8c9a6ceed4d4ec014caa442deb8ad74b27cf451e5bd257503270adb8f90e2483.png" src="_images/8c9a6ceed4d4ec014caa442deb8ad74b27cf451e5bd257503270adb8f90e2483.png" />
 </div>
 </div>
 <p>La distribución de la variable <code class="docutils literal notranslate"><span class="pre">isFraud</span></code> revela un claro desbalance de clases: aproximadamente el 92% de las transacciones corresponden a casos no fraudulentos, mientras que solo el 8% son clasificadas como fraude. Esta desproporción puede afectar el desempeño de los modelos de clasificación, ya que las clases mayoritarias tienden a dominar las predicciones si no se aplican estrategias correctivas. Por esta razón, más adelante se implementarán técnicas de balanceo que permitirán mitigar este sesgo y mejorar la sensibilidad del modelo frente a la clase minoritaria.</p>
@@ -976,7 +1123,7 @@ Clase 1.0 -&gt; 11,318 transacciones (7.85%)
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/f97dbe9b2bde2f20f4516700e0d3dfbc717d20b76d575f76de2d99d5fb589056.png" src="_images/f97dbe9b2bde2f20f4516700e0d3dfbc717d20b76d575f76de2d99d5fb589056.png" />
+<img alt="_images/135b9c9eff388bca4889e00d30908a5d81c5d18d60f9ce704c0b3e6535b6d71b.png" src="_images/135b9c9eff388bca4889e00d30908a5d81c5d18d60f9ce704c0b3e6535b6d71b.png" />
 </div>
 </div>
 <p>La variable <code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code> corresponde a un intervalo de tiempo medido a partir de una fecha y hora de referencia no especificada. Aunque no se detalla su unidad de medida oficial, su comportamiento creciente y el orden secuencial de los registros sugieren que podría representar una magnitud temporal como segundos o minutos. No obstante, dado que esta información no está explícitamente definida, no se asume ninguna escala temporal absoluta.</p>
@@ -1003,7 +1150,7 @@ Clase 1.0 -&gt; 11,318 transacciones (7.85%)
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/dca67226ebf637bd4e407c8fabc846273c8206b1b447d466778f87dead12c94b.png" src="_images/dca67226ebf637bd4e407c8fabc846273c8206b1b447d466778f87dead12c94b.png" />
+<img alt="_images/07f86823e9a31c81eabef3fe72b316773d9db57888e15d412e4ff92fa577fae2.png" src="_images/07f86823e9a31c81eabef3fe72b316773d9db57888e15d412e4ff92fa577fae2.png" />
 </div>
 </div>
 <p>En esta sección se presentan los histogramas de cuatro variables con representación numérica: <code class="docutils literal notranslate"><span class="pre">transactionamt</span></code>, <code class="docutils literal notranslate"><span class="pre">id_02</span></code>, <code class="docutils literal notranslate"><span class="pre">d1</span></code> y <code class="docutils literal notranslate"><span class="pre">card1</span></code>. De acuerdo con la documentación, <code class="docutils literal notranslate"><span class="pre">transactionamt</span></code> corresponde al importe de la transacción en dólares estadounidenses, por lo que puede considerarse una variable numérica continua real. En este caso, el uso de un histograma es pertinente y revela una distribución fuertemente asimétrica hacia la derecha, con una alta concentración de montos bajos y algunos valores extremos, posiblemente correspondientes a pagos atípicos o devoluciones.</p>
@@ -1050,9 +1197,9 @@ Clase 1.0 -&gt; 11,318 transacciones (7.85%)
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Resumen estadístico de &#39;transactionamt&#39;
 
        transactionamt
-count   144233.000000
-mean        83.554533
-std         99.850258
+count   144218.000000
+mean        83.557032
+std         99.853824
 min          0.251000
 25%         25.453000
 50%         50.000000
@@ -1087,7 +1234,7 @@ max       1800.000000
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/8cb5460ae7ff2444dd4fd7014dc315f1b498fb82ddbd51504e4fa877c7df0cfb.png" src="_images/8cb5460ae7ff2444dd4fd7014dc315f1b498fb82ddbd51504e4fa877c7df0cfb.png" />
+<img alt="_images/17493cdfb202baf0e539424bd49a0e2559d19c00d090d8777192123c7dc9b148.png" src="_images/17493cdfb202baf0e539424bd49a0e2559d19c00d090d8777192123c7dc9b148.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1105,13 +1252,13 @@ max       1800.000000
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Resumen estadístico de las variables D1 a D15:
 
                   d1             d8             d9
-count  144233.000000  144233.000000  144233.000000
-mean       29.330390     172.600160       0.553671
-std        95.150487     182.358745       0.240271
+count  144218.000000  144218.000000  144218.000000
+mean       29.333115     172.608319       0.553668
+std        95.154985     182.364964       0.240275
 min         0.000000       0.000000       0.000000
 25%         0.000000      29.083332       0.483333
 50%         0.000000     146.058108       0.561057
-75%         0.000000     221.791669       0.708333
+75%         0.000000     221.791672       0.708333
 max       640.000000    1707.791626       0.958333
 </pre></div>
 </div>
@@ -1173,7 +1320,7 @@ Conclusión: Rechazamos H0 → No es normal
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/62a023da742a785b981723dba8649dc00d7508c026801d169a922aac0f4020b3.png" src="_images/62a023da742a785b981723dba8649dc00d7508c026801d169a922aac0f4020b3.png" />
+<img alt="_images/fd22e0eca2dda3db418c323c64a715ccc1299940d4cccccb73a407ae41233f6f.png" src="_images/fd22e0eca2dda3db418c323c64a715ccc1299940d4cccccb73a407ae41233f6f.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1235,7 +1382,7 @@ Conclusión: Rechazamos H0 → no es normal
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/b8d3873c0afc747c9ed47b84dfa7e91169ebfbb21670097dc880c2ae0232ee72.png" src="_images/b8d3873c0afc747c9ed47b84dfa7e91169ebfbb21670097dc880c2ae0232ee72.png" />
+<img alt="_images/67c1e37e7d35c76c1caad6c2de33ea28d11800010d2573132ac4fe6647d6ed1c.png" src="_images/67c1e37e7d35c76c1caad6c2de33ea28d11800010d2573132ac4fe6647d6ed1c.png" />
 </div>
 </div>
 <p>Con base en la variable <code class="docutils literal notranslate"><span class="pre">TransactionDT</span></code> previamente transformada a una escala de “hora virtual”, se generó una nueva visualización que incorpora la variable objetivo <code class="docutils literal notranslate"><span class="pre">isfraud</span></code>. Esta partición permite comparar directamente el comportamiento temporal de las transacciones legítimas y fraudulentas a lo largo del tiempo registrado en el dataset.</p>
@@ -1247,7 +1394,7 @@ Conclusión: Rechazamos H0 → no es normal
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;id_01&#39;, &#39;id_02&#39;, &#39;id_05&#39;, &#39;id_06&#39;, &#39;id_09&#39;, &#39;id_10&#39;, &#39;id_19&#39;, &#39;id_20&#39;, &#39;isfraud&#39;, &#39;transactiondt&#39;, &#39;transactionamt&#39;, &#39;card1&#39;, &#39;card2&#39;, &#39;addr1&#39;, &#39;c3&#39;, &#39;c14&#39;, &#39;d1&#39;, &#39;d8&#39;, &#39;d9&#39;, &#39;v98&#39;, &#39;v124&#39;, &#39;v135&#39;, &#39;v138&#39;, &#39;v140&#39;, &#39;v141&#39;, &#39;v142&#39;, &#39;v146&#39;, &#39;v149&#39;, &#39;v152&#39;, &#39;v159&#39;, &#39;v160&#39;, &#39;v161&#39;, &#39;v162&#39;, &#39;v164&#39;, &#39;v169&#39;, &#39;v172&#39;, &#39;v173&#39;, &#39;v174&#39;, &#39;v175&#39;, &#39;v177&#39;, &#39;v184&#39;, &#39;v185&#39;, &#39;v208&#39;, &#39;v220&#39;, &#39;v223&#39;, &#39;v224&#39;, &#39;v225&#39;, &#39;v226&#39;, &#39;v227&#39;, &#39;v229&#39;, &#39;v238&#39;, &#39;v250&#39;, &#39;v261&#39;, &#39;v267&#39;, &#39;v271&#39;, &#39;v274&#39;, &#39;v277&#39;, &#39;v281&#39;, &#39;v282&#39;, &#39;v286&#39;, &#39;v287&#39;, &#39;v289&#39;, &#39;v291&#39;, &#39;v296&#39;, &#39;v301&#39;, &#39;v311&#39;, &#39;v313&#39;, &#39;v314&#39;, &#39;v326&#39;, &#39;v335&#39;, &#39;v338&#39;, &#39;id_38&#39;, &#39;card6&#39;, &#39;transaction_hour&#39;]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;id_01&#39;, &#39;id_02&#39;, &#39;id_05&#39;, &#39;id_06&#39;, &#39;id_09&#39;, &#39;id_10&#39;, &#39;id_19&#39;, &#39;id_20&#39;, &#39;isfraud&#39;, &#39;transactiondt&#39;, &#39;transactionamt&#39;, &#39;card1&#39;, &#39;card2&#39;, &#39;addr1&#39;, &#39;c3&#39;, &#39;c14&#39;, &#39;d1&#39;, &#39;d8&#39;, &#39;d9&#39;, &#39;v98&#39;, &#39;v124&#39;, &#39;v135&#39;, &#39;v138&#39;, &#39;v140&#39;, &#39;v141&#39;, &#39;v142&#39;, &#39;v146&#39;, &#39;v149&#39;, &#39;v152&#39;, &#39;v159&#39;, &#39;v160&#39;, &#39;v161&#39;, &#39;v162&#39;, &#39;v164&#39;, &#39;v169&#39;, &#39;v172&#39;, &#39;v173&#39;, &#39;v174&#39;, &#39;v175&#39;, &#39;v177&#39;, &#39;v184&#39;, &#39;v185&#39;, &#39;v208&#39;, &#39;v220&#39;, &#39;v223&#39;, &#39;v224&#39;, &#39;v225&#39;, &#39;v226&#39;, &#39;v227&#39;, &#39;v229&#39;, &#39;v238&#39;, &#39;v250&#39;, &#39;v261&#39;, &#39;v267&#39;, &#39;v271&#39;, &#39;v274&#39;, &#39;v277&#39;, &#39;v281&#39;, &#39;v282&#39;, &#39;v286&#39;, &#39;v287&#39;, &#39;v289&#39;, &#39;v291&#39;, &#39;v296&#39;, &#39;v301&#39;, &#39;v311&#39;, &#39;v313&#39;, &#39;v314&#39;, &#39;v326&#39;, &#39;v335&#39;, &#39;v338&#39;, &#39;id_38&#39;, &#39;card6&#39;, &#39;transaction_hour&#39;, &#39;transactionamt_log&#39;]
 </pre></div>
 </div>
 </div>
@@ -1309,7 +1456,7 @@ Conclusión: Rechazamos H0 → no es normal
 <img alt="_images/e4b78debd7b08694297c2bc105acd7413273f2bda01553a0ae4230b13132e189.png" src="_images/e4b78debd7b08694297c2bc105acd7413273f2bda01553a0ae4230b13132e189.png" />
 <img alt="_images/39a223ab05c0cf06ddfb7d1753ec22930df44905f389e8dc5e8e76cd44b7fdbf.png" src="_images/39a223ab05c0cf06ddfb7d1753ec22930df44905f389e8dc5e8e76cd44b7fdbf.png" />
 <img alt="_images/bbbbfb94d668daf4ad99e615fbf309a83580502251b92e84a42ef1058bc3fdc4.png" src="_images/bbbbfb94d668daf4ad99e615fbf309a83580502251b92e84a42ef1058bc3fdc4.png" />
-<img alt="_images/47ec90bfd453550489b0a8364c0fd6342f9ab6f89064d9ca3a94af6c016adf30.png" src="_images/47ec90bfd453550489b0a8364c0fd6342f9ab6f89064d9ca3a94af6c016adf30.png" />
+<img alt="_images/a5ee1a92c55571eda31e0c73e7e7f652147aebb1b6d59a042135c457429a8cea.png" src="_images/a5ee1a92c55571eda31e0c73e7e7f652147aebb1b6d59a042135c457429a8cea.png" />
 </div>
 </div>
 <p>A partir de las gráficas generadas que representan la proporción de fraude por valor específico en distintas variables con baja cardinalidad, se pueden observar patrones interesantes de asociación entre ciertos valores y la variable objetivo <code class="docutils literal notranslate"><span class="pre">isfraud</span></code>. La mayoría de las variables analizadas provienen del grupo codificado como <code class="docutils literal notranslate"><span class="pre">vXXX</span></code>, correspondiente a funciones de la plataforma Vesta relacionadas con clasificaciones y relaciones entre entidades. Por ejemplo, variables como <code class="docutils literal notranslate"><span class="pre">v124</span></code>, <code class="docutils literal notranslate"><span class="pre">v142</span></code>, <code class="docutils literal notranslate"><span class="pre">v146</span></code> o <code class="docutils literal notranslate"><span class="pre">v238</span></code> muestran una concentración significativa de fraude en un subconjunto reducido de valores, con proporciones que incluso alcanzan el 100% para ciertos casos, lo que sugiere que pueden tener una alta capacidad discriminativa si se utilizan adecuadamente en el modelo.</p>
@@ -1319,18 +1466,16 @@ Conclusión: Rechazamos H0 → no es normal
 <h3><strong>Transformación final</strong><a class="headerlink" href="#transformacion-final" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd"># Eliminar columna original si ya no se usará</span>
-<span class="sd">df = df.drop(columns=[&#39;transactionamt&#39;])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Eliminar columna original si ya no se usará</span>
+<span class="c1">#df = df.drop(columns=[&#39;transactionamt&#39;])</span>
 
-<span class="sd"># Renombrar la transformada para mantener consistencia</span>
-<span class="sd">df.rename(columns={&#39;transactionamt_log&#39;: &#39;transactionamt&#39;}, inplace=True)</span>
+<span class="c1"># Renombrar la transformada para mantener consistencia</span>
+<span class="c1">#df.rename(columns={&#39;transactionamt_log&#39;: &#39;transactionamt&#39;}, inplace=True)</span>
 
-<span class="sd"># Guardar</span>
-<span class="sd">df.to_csv(&quot;fraude_final.csv&quot;, index=False)</span>
+<span class="c1"># Guardar</span>
+<span class="c1">#df.to_csv(&quot;fraude_final.csv&quot;, index=False)</span>
 
-<span class="sd">print(&quot;Dataset guardado como &#39;fraude_final.csv&#39; con la versión logarítmica.&quot;)</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="c1">#print(&quot;Dataset guardado como &#39;fraude_final.csv&#39; con la versión logarítmica.&quot;)</span>
 </pre></div>
 </div>
 </div>
