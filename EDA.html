@@ -650,34 +650,6 @@ Variable 1 Variable 2  Correlación
 </div>
 </div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-
-<span class="c1"># Filtrar variables numéricas con al menos 2 valores distintos</span>
-<span class="n">num_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;number&#39;</span><span class="p">)</span>
-<span class="n">num_cols</span> <span class="o">=</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">num_cols</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
-
-<span class="c1"># Correlación y heatmap</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">18</span><span class="p">))</span>  <span class="c1"># Ajusta tamaño según cantidad de columnas</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
-    <span class="n">num_cols</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;rocket&#39;</span><span class="p">,</span>
-    <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">annot</span><span class="o">=</span><span class="kc">False</span>
-<span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Mapa de calor de correlaciones - variables numéricas con varianza&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="_images/0f98dc674eca08866c3d1e66a8774dec59458d849e69012fb0f4b61e80fbcaae.png" src="_images/0f98dc674eca08866c3d1e66a8774dec59458d849e69012fb0f4b61e80fbcaae.png" />
-</div>
-</div>
 <p>Con el objetivo de verificar visualmente la eficacia del procedimiento de reducción de multicolinealidad, se presenta a continuación el mapa de calor de correlaciones entre todas las variables numéricas del dataset final que conservan varianza. Se observa que, tras la eliminación iterativa de variables con alto Factor de Inflación de Varianza (VIF), las correlaciones lineales entre las variables restantes son, en general, moderadas o bajas. Este resultado valida la consistencia del proceso de depuración, ya que no se identifican agrupaciones de variables con correlaciones cercanas a ±1, lo que garantiza una mayor estabilidad en los modelos de clasificación que se construirán posteriormente.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">

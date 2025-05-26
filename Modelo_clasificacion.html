@@ -584,6 +584,28 @@ Name: proportion, dtype: float64
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Mostrar nombres de columnas</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nombres de columnas:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fraude_train</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+<span class="c1"># Mostrar dimensionalidad (filas, columnas)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dimensiones del dataset:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fraude_train</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nombres de columnas:
+[&#39;cat__id_38_F&#39;, &#39;cat__id_38_T&#39;, &#39;cat__card6_credit&#39;, &#39;cat__card6_debit&#39;, &#39;num__id_01&#39;, &#39;num__id_02&#39;, &#39;num__id_05&#39;, &#39;num__id_06&#39;, &#39;num__id_09&#39;, &#39;num__id_10&#39;, &#39;num__id_19&#39;, &#39;num__id_20&#39;, &#39;num__transactiondt&#39;, &#39;num__card1&#39;, &#39;num__card2&#39;, &#39;num__addr1&#39;, &#39;num__c3&#39;, &#39;num__c14&#39;, &#39;num__d1&#39;, &#39;num__d8&#39;, &#39;num__d9&#39;, &#39;num__v98&#39;, &#39;num__v124&#39;, &#39;num__v135&#39;, &#39;num__v138&#39;, &#39;num__v140&#39;, &#39;num__v141&#39;, &#39;num__v142&#39;, &#39;num__v146&#39;, &#39;num__v149&#39;, &#39;num__v152&#39;, &#39;num__v159&#39;, &#39;num__v160&#39;, &#39;num__v161&#39;, &#39;num__v162&#39;, &#39;num__v164&#39;, &#39;num__v169&#39;, &#39;num__v172&#39;, &#39;num__v173&#39;, &#39;num__v174&#39;, &#39;num__v175&#39;, &#39;num__v177&#39;, &#39;num__v184&#39;, &#39;num__v185&#39;, &#39;num__v208&#39;, &#39;num__v220&#39;, &#39;num__v223&#39;, &#39;num__v224&#39;, &#39;num__v225&#39;, &#39;num__v226&#39;, &#39;num__v227&#39;, &#39;num__v229&#39;, &#39;num__v238&#39;, &#39;num__v250&#39;, &#39;num__v261&#39;, &#39;num__v267&#39;, &#39;num__v271&#39;, &#39;num__v274&#39;, &#39;num__v277&#39;, &#39;num__v281&#39;, &#39;num__v282&#39;, &#39;num__v286&#39;, &#39;num__v287&#39;, &#39;num__v289&#39;, &#39;num__v291&#39;, &#39;num__v296&#39;, &#39;num__v301&#39;, &#39;num__v311&#39;, &#39;num__v313&#39;, &#39;num__v314&#39;, &#39;num__v326&#39;, &#39;num__v335&#39;, &#39;num__v338&#39;, &#39;num__transactionamt&#39;, &#39;isfraud&#39;]
+
+Dimensiones del dataset:
+(144218, 75)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># === 1. Importar librerías ===</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span><span class="p">,</span> <span class="n">cross_val_score</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
@@ -732,28 +754,28 @@ Name: proportion, dtype: float64
   warnings.warn(
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC promedio para k=1: 0.9818
-AUC promedio para k=2: 0.9818
-AUC promedio para k=3: 0.9817
-AUC promedio para k=4: 0.9817
-AUC promedio para k=5: 0.9815
-AUC promedio para k=6: 0.9811
-AUC promedio para k=7: 0.9803
-AUC promedio para k=8: 0.9788
-AUC promedio para k=9: 0.9768
-AUC promedio para k=10: 0.9745
-AUC promedio para k=11: 0.9716
-AUC promedio para k=12: 0.9688
-AUC promedio para k=13: 0.9661
-AUC promedio para k=14: 0.9636
-AUC promedio para k=15: 0.9611
-AUC promedio para k=16: 0.9590
-AUC promedio para k=17: 0.9570
-AUC promedio para k=18: 0.9551
-AUC promedio para k=19: 0.9533
-AUC promedio para k=20: 0.9515
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC promedio para k=1: 0.9109
+AUC promedio para k=2: 0.9229
+AUC promedio para k=3: 0.9285
+AUC promedio para k=4: 0.9300
+AUC promedio para k=5: 0.9298
+AUC promedio para k=6: 0.9281
+AUC promedio para k=7: 0.9259
+AUC promedio para k=8: 0.9233
+AUC promedio para k=9: 0.9208
+AUC promedio para k=10: 0.9180
+AUC promedio para k=11: 0.9152
+AUC promedio para k=12: 0.9123
+AUC promedio para k=13: 0.9093
+AUC promedio para k=14: 0.9064
+AUC promedio para k=15: 0.9037
+AUC promedio para k=16: 0.9011
+AUC promedio para k=17: 0.8986
+AUC promedio para k=18: 0.8962
+AUC promedio para k=19: 0.8940
+AUC promedio para k=20: 0.8917
 
-Mejor AUC: 0.9818, obtenido con k=2
+Mejor AUC: 0.9300, obtenido con k=4
 </pre></div>
 </div>
 </div>
@@ -786,17 +808,25 @@ Mejor AUC: 0.9818, obtenido con k=2
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo de cómputo (KNN con k=2): 14.8305 segundos
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo de cómputo (KNN con k=2): 23.2767 segundos
 
 === Classification Report ===
               precision    recall  f1-score   support
 
-         0.0       0.96      0.97      0.97     39871
-         1.0       0.63      0.58      0.60      3395
+         0.0       0.92      1.00      0.96     39871
+         1.0       0.00      0.00      0.00      3395
 
-    accuracy                           0.94     43266
-   macro avg       0.80      0.77      0.79     43266
-weighted avg       0.94      0.94      0.94     43266
+    accuracy                           0.92     43266
+   macro avg       0.46      0.50      0.48     43266
+weighted avg       0.85      0.92      0.88     43266
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_classification.py:1531: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f&quot;{metric.capitalize()} is&quot;, len(result))
+c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_classification.py:1531: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f&quot;{metric.capitalize()} is&quot;, len(result))
+c:\Users\Asus\anaconda3\Lib\site-packages\sklearn\metrics\_classification.py:1531: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f&quot;{metric.capitalize()} is&quot;, len(result))
 </pre></div>
 </div>
 </div>
