@@ -433,7 +433,7 @@ document.write(`
 <span class="c1"># === Crear pipeline con el mejor k encontrado (k=9) ===</span>
 <span class="n">pipe_knn</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
     <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
-    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">9</span><span class="p">))</span>
+    <span class="p">(</span><span class="s1">&#39;knn&#39;</span><span class="p">,</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
 <span class="p">])</span>
 </pre></div>
 </div>
@@ -485,17 +485,17 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo de cómputo (pipeline KNN): 16.40 segundos
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tiempo de cómputo (pipeline KNN): 20.35 segundos
 
 === Classification Report ===
               precision    recall  f1-score   support
 
-         0.0       0.97      0.89      0.93     39871
-         1.0       0.36      0.72      0.48      3395
+         0.0       0.97      0.92      0.94     39871
+         1.0       0.42      0.68      0.52      3395
 
-    accuracy                           0.88     43266
-   macro avg       0.66      0.81      0.70     43266
-weighted avg       0.93      0.88      0.89     43266
+    accuracy                           0.90     43266
+   macro avg       0.70      0.80      0.73     43266
+weighted avg       0.93      0.90      0.91     43266
 </pre></div>
 </div>
 </div>
@@ -515,7 +515,7 @@ weighted avg       0.93      0.88      0.89     43266
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/dc20329ded1178c8edaf0c9d104ab07a0a31b7b6d4e2e988f552789eded79946.png" src="_images/dc20329ded1178c8edaf0c9d104ab07a0a31b7b6d4e2e988f552789eded79946.png" />
+<img alt="_images/1405525d1b8f0b107b0d8d7458daf79d694c53273f50032f7e4eeb48ae64b665.png" src="_images/1405525d1b8f0b107b0d8d7458daf79d694c53273f50032f7e4eeb48ae64b665.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -549,7 +549,7 @@ weighted avg       0.93      0.88      0.89     43266
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/ffd1c1325393d7e66b0c8e50167386fbb59e435f89a40652f82681a18d9510fa.png" src="_images/ffd1c1325393d7e66b0c8e50167386fbb59e435f89a40652f82681a18d9510fa.png" />
+<img alt="_images/d45b418af1126aad9be8ef27dc4a1d9b4a5b6fe68ba6c2f6572798ee95fa867e.png" src="_images/d45b418af1126aad9be8ef27dc4a1d9b4a5b6fe68ba6c2f6572798ee95fa867e.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -573,10 +573,10 @@ weighted avg       0.93      0.88      0.89     43266
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC final sobre test: 0.8671
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>AUC final sobre test: 0.8591
 </pre></div>
 </div>
-<img alt="_images/2a3e1a4cf1b05655a6b9eb4af24c533d0d5814ec1bbc5702b725573dfde04c63.png" src="_images/2a3e1a4cf1b05655a6b9eb4af24c533d0d5814ec1bbc5702b725573dfde04c63.png" />
+<img alt="_images/bb4d9045b00172cc684fc01732bca8ab9a72c335f772962afff46d647c558c21.png" src="_images/bb4d9045b00172cc684fc01732bca8ab9a72c335f772962afff46d647c558c21.png" />
 </div>
 </div>
 </section>
@@ -650,20 +650,36 @@ weighted avg       0.90      0.17      0.18     43266
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># matriz de confusión</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># === Matriz de confusión (sin normalizar) ===</span>
 <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;YlGnBu&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión - Naive Bayes (Pipeline)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión - Naive Bayes&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+
+<span class="c1"># === Matriz de confusión normalizada ===</span>
+<span class="n">cm_norm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;true&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm_norm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2f&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;YlGnBu&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión Normalizada - Naive Bayes&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/89a95c4a539aca5a7f7b448774dc89288ccfcaab9a0da4de251d860658d63027.png" src="_images/89a95c4a539aca5a7f7b448774dc89288ccfcaab9a0da4de251d860658d63027.png" />
+<img alt="_images/e16c5849fb4a79b001b65b019242ebaf2d1db8e27c77ab5aba9db736f0193091.png" src="_images/e16c5849fb4a79b001b65b019242ebaf2d1db8e27c77ab5aba9db736f0193091.png" />
 </div>
 </div>
 <div class="cell docutils container">
